@@ -17,7 +17,7 @@ app.use(bodyParser.urlencoded());
 app.use(cors());
 //app.use(cookieParser());
 
-app.use('/candidates', require('./routes/candidates'));
+app.use('/candidate', require('./routes/candidate'));
 
 /// catch 404 and forward to error handler
 app.use(function(req, res, next) {
