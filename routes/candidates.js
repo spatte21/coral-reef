@@ -1,5 +1,6 @@
 var express = require('express'),
     router = express.Router(),
+    moment = require('moment'),
     Candidate = require('../models/candidate');
 
 /* GET users listing. */
@@ -17,8 +18,21 @@ router.get('/', function(req, res) {
 });
 
 router.post('/', function(req, res) {
-    console.log(req.body)
-    res.send({ message: 'done'});
+    var candidate = new Candidate({
+        buildId: req.body.buildId,
+        branch: req.body.branch,
+        buildDate: moment().format('yyyy-MM-dd HH:mm:ss'),
+        status: 'ready'
+    });
+
+    candidate.save(function(err) {
+        if (err) {
+            res.send({ error: err });
+        }
+        else {
+            res.send(candidate);
+        }
+    })
 });
 
 module.exports = router;
