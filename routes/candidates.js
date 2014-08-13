@@ -6,7 +6,7 @@ var express = require('express'),
 router.get('/', function(req, res) {
     Candidate
         .find()
-        .limit(3)
+        .limit(10)
         .sort('-buildId')
         .exec(function(err, results) {
         if (err) {
