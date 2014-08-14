@@ -50,6 +50,8 @@ candidateSchema.virtual('status').get(function() {
         status = 'Deployed';
     }
     return status;
-})
+});
+
+candidateSchema.set('toJSON', { virtuals: true });
 
 module.exports = mongoose.model('Candidate', candidateSchema);
