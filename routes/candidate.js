@@ -3,7 +3,7 @@ var express = require('express'),
     moment = require('moment'),
     Candidate = require('../models/candidate');
 
-/* GET users listing. */
+// GET /
 router.get('/', function(req, res) {
     var query = Candidate.find();
 
@@ -16,7 +16,7 @@ router.get('/', function(req, res) {
     }
 
     query
-        .sort('-buildId')
+        .sort('-buildDate')
         .exec(function(err, results) {
             if (err) {
                 console.log(err);
@@ -25,12 +25,18 @@ router.get('/', function(req, res) {
         });
 });
 
+// POST /
 router.post('/', function(req, res) {
+
+    console.log(req.body);
 
     var candidate = new Candidate({
         buildId: req.body.buildId,
-        branch: req.body.branch
+        branch: req.body.branch,
+        buildDate: moment()
     });
+
+    console.log(candidate.deployment);
 
     candidate.save(function(err) {
         res.status(err ? 500 : 200).send(err || candidate);

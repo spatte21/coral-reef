@@ -1,4 +1,5 @@
-var mongoose = require('mongoose');
+var mongoose = require('mongoose'),
+    moment = require('moment');
 
 // var testReportSchema = new mongoose.Schema({
 //     suite: String,
@@ -27,7 +28,28 @@ var candidateSchema = new mongoose.Schema({
     buildId: String,
     branch: String,
     buildDate: { type: Date, default: Date.now },
-    status: { type: String, default: 'Ready to Deploy' }
+    deployment: {
+        started: { type: Date, default: null },
+        completed: { type: Date, default: null },
+        hrUrl: { type: String, default: '' },
+        recruitmentUrl: { type: String, default: '' },
+        mobileUrl: { type: String, default: '' },
+        extra: { type: String, default: '' }
+    }
 });
+
+candidateSchema.virtual('status').get(function() {
+    var status = 'Unknown';
+    if (this.deployment.started === null) {
+        status = 'Ready to deploy';
+    }
+    else if (this.deployment.completed === null) {
+        status = 'Deploying';
+    }
+    else {
+        status = 'Deployed';
+    }
+    return status;
+})
 
 module.exports = mongoose.model('Candidate', candidateSchema);
