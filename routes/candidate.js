@@ -28,15 +28,11 @@ router.get('/', function(req, res) {
 // POST /
 router.post('/', function(req, res) {
 
-    console.log(req.body);
-
     var candidate = new Candidate({
         buildId: req.body.buildId,
         branch: req.body.branch,
         buildDate: moment()
     });
-
-    console.log(candidate.deployment);
 
     candidate.save(function(err) {
         res.status(err ? 500 : 200).send(err || candidate);
