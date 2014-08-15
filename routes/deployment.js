@@ -14,7 +14,6 @@ router.get('/', function(req, res) {
         });
 });
 
-
 router.get('/waiting', function(req, res) {
     var query = Candidate
         .find( { 'deployment.started': null })

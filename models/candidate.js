@@ -24,6 +24,16 @@ var mongoose = require('mongoose'),
 //     displayStatus: String
 // });
 
+var testSuiteSchema = new mongoose.Schema({
+    name: { type: String, default: null},
+    started: { type: Date, default: null },
+    completed: { type: Date, default: null },
+    run: { type: Number, default: 0 },
+    passed: { type: Number, default: 0 },
+    failed: { type: Number, default: 0 },
+    extra: { type: String, default: ''}
+});
+
 var candidateSchema = new mongoose.Schema({
     buildId: String,
     branch: String,
@@ -35,8 +45,13 @@ var candidateSchema = new mongoose.Schema({
         recruitmentUrl: { type: String, default: '' },
         mobileUrl: { type: String, default: '' },
         extra: { type: String, default: '' }
+    },
+    testing: {
+        started: { type: Date, default: null },
+        completed: { type: Date, default: null },
+        suites: [ testSuiteSchema ]
     }
-});
+ });
 
 candidateSchema.virtual('status').get(function() {
     var status = 'Unknown';
@@ -46,8 +61,14 @@ candidateSchema.virtual('status').get(function() {
     else if (this.deployment.completed === null) {
         status = 'Deploying';
     }
-    else {
+    else if (this.testing.started === null) {
         status = 'Deployed';
+    }
+    else if (this.testing.completed === null) {
+        status = 'Testing';
+    }
+    else {
+        status = 'Testing Complete';
     }
     return status;
 });
