@@ -4,20 +4,9 @@ var express = require('express'),
     Candidate = require('../models/candidate');
 
 // GET /
-router.get('/', function(req, res) {
-    var query = Candidate
-        .find()
-        .select('buildId deployment')
-        .sort('-buildDate')
-        .exec(function(err, results) {
-            res.status(err ? 500 : 200).send(results);
-        });
-});
-
 router.get('/waiting', function(req, res) {
     var query = Candidate
         .find( { 'deployment.started': null })
-        .select('buildId deployment')
         .sort('-buildDate')
         .exec(function(err, results) {
             res.status(err ? 500 : 200).send(results);
@@ -32,7 +21,6 @@ router.get('/started', function(req, res) {
                 { 'deployment.completed': null }
             ]
         })
-        .select('buildId deployment')
         .sort('-buildDate')
         .exec(function(err, results) {
             res.status(err ? 500 : 200).send(results);
@@ -42,22 +30,9 @@ router.get('/started', function(req, res) {
 router.get('/completed', function(req, res) {
     var query = Candidate
         .find( { 'deployment.completed': { $ne: null } })
-        .select('buildId deployment')
         .sort('-buildDate')
         .exec(function(err, results) {
             res.status(err ? 500 : 200).send(results);
-        });
-});
-
-router.get('/:id', function(req, res) {
-    var query = Candidate
-        .findOne({
-            'buildId': req.params.id
-        })
-        .select('buildId deployment')
-        .sort('-buildDate')
-        .exec(function(err, result) {
-            res.status(err ? 500 : 200).send(result);
         });
 });
 

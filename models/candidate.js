@@ -24,14 +24,18 @@ var mongoose = require('mongoose'),
 //     displayStatus: String
 // });
 
-var testSuiteSchema = new mongoose.Schema({
-    name: { type: String, default: null},
-    started: { type: Date, default: null },
-    completed: { type: Date, default: null },
-    run: { type: Number, default: 0 },
-    passed: { type: Number, default: 0 },
-    failed: { type: Number, default: 0 },
-    extra: { type: String, default: ''}
+var testStatsSchema = new mongoose.Schema({
+    module: { type: String, default: null},
+    stats: {
+        suites: { type: Number, default: 0 },
+        tests: { type: Number, default: 0 },
+        passes: { type: Number, default: 0 },
+        pending: { type: Number, default: 0 },
+        failures: { type: Number, default: 0 },
+        start: { type: Date, default: null },
+        end: { type: Date, default: null },
+        duration: { type: Number, default: 0 }
+    }
 });
 
 var candidateSchema = new mongoose.Schema({
@@ -49,7 +53,7 @@ var candidateSchema = new mongoose.Schema({
     testing: {
         started: { type: Date, default: null },
         completed: { type: Date, default: null },
-        suites: [ testSuiteSchema ]
+        tests: [ testStatsSchema ]
     }
  });
 

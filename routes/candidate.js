@@ -18,12 +18,21 @@ router.get('/', function(req, res) {
     query
         .sort('-buildDate')
         .exec(function(err, results) {
-            if (err) {
-                console.log(err);
-            }
-            res.send(results);
+            res.status(err ? 500 : 200).send(results);
         });
 });
+
+router.get('/:id', function(req, res) {
+    var query = Candidate
+        .findOne({
+            'buildId': req.params.id
+        })
+        .sort('-buildDate')
+        .exec(function(err, result) {
+            res.status(err ? 500 : 200).send(result);
+        });
+});
+
 
 // POST /
 router.post('/', function(req, res) {
