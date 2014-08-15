@@ -35,7 +35,9 @@ var testStatsSchema = new mongoose.Schema({
         start: { type: Date, default: null },
         end: { type: Date, default: null },
         duration: { type: Number, default: 0 }
-    }
+    },
+    resultsFile: { type: String, default: null },
+    logFiles: [ String ]
 });
 
 var candidateSchema = new mongoose.Schema({

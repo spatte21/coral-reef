@@ -43,17 +43,22 @@ router.get('/completed', function(req, res) {
 
 router.put('/:buildId/:module', function(req, res) {
 
-    Candidate.findOne({'buildId': req.params.id}, function(err, candidate) {
-            if (candidate.testing.started === null) {
-                candidate.testing.started = moment();
+    Candidate.findOne({'buildId': req.params.buildId}, function(err, candidate) {
+            if (candidate !== null) {
+                if (candidate.testing.started === null) {
+                    candidate.testing.started = moment();
+                }
+                candidate.testing.tests.push({
+                    module: req.params.module,
+                    stats: req.body.stats
+                })
+                candidate.save(function(err) {
+                    res.status(err ? 500 : 200).send({message: 'ta'});
+                });
             }
-            candidate.testing.tests.push({
-                module: req.params.module,
-                stats: req.body.stats
-            })
-            candidate.save(function(err) {
-                res.status(err ? 500 : 200).send({message: 'ta'});
-            });
+            else {
+                res.send({message:'No candidate with this buildId'});
+            }
         });
 });
 

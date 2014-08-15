@@ -36,17 +36,13 @@ router.get('/completed', function(req, res) {
         });
 });
 
-router.put('/:id', function(req, res) {
-
-    Candidate.update({buildId: req.params.id}, { $set: { deployment: req.body } })
-
-    Candidate.findOne({'buildId': req.params.id}, function(err, candidate) {
+router.put('/:buildId', function(req, res) {
+    console.log('yo');
+    Candidate.findOne({'buildId': req.params.buildId}, function(err, candidate) {
             candidate.deployment = req.body;
+            console.log(req.body);
             candidate.save(function(err) {
-                res.status(err ? 500 : 200).send({
-                    buildId: candidate.buildId,
-                    deployment: candidate.deployment
-                });
+                res.status(err ? 500 : 200).send({message: 'ta'});
             });
         });
 });

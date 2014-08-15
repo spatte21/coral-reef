@@ -33,7 +33,6 @@ router.get('/:id', function(req, res) {
         });
 });
 
-
 // POST /
 router.post('/', function(req, res) {
 
@@ -44,7 +43,7 @@ router.post('/', function(req, res) {
     });
 
     candidate.save(function(err) {
-        res.status(err ? 500 : 200).send(err || candidate);
+        res.status(err ? 500 : 200).send({message: 'ta'});
     });
 });
 
