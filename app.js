@@ -21,6 +21,7 @@ app.use('/candidate', require('./routes/candidate'));
 app.use('/deployment', require('./routes/deployment'));
 app.use('/testing', require('./routes/testing'));
 app.use('/releaseEvent', require('./routes/releaseEvent'));
+app.use('/weatherForecast', require('./routes/weatherForecast'));
 
 /// catch 404 and forward to error handler
 app.use(function(req, res, next) {
