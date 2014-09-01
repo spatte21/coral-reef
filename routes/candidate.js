@@ -8,7 +8,7 @@ router.get('/', function(req, res) {
     var query = Candidate.find();
 
     if (req.query.status) {
-        query = query.where('status').equalsl(req.query.status);
+        query = query.where('status').equals(req.query.status);
     }
 
     if (req.query.top) {
