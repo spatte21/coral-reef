@@ -6,15 +6,16 @@ var express = require('express'),
 
 // GET /
 router.get('/', function(req, res) {
-  var secret_key = req.params.shush;
+  var secret_key = req.query.shush;
   if (!secret_key || secret_key !== process.env.WEBSITE_SECRET_KEY) {
     res.status(403).send("Not authorised");
-  }
-
-  var query = ReleaseEvent
-    .find()
-    .where('ends').gt(Date(moment().add('d', -14).toISOString()))
-    .sort({starts: 'asc'});
+  } else {
+    var query = ReleaseEvent
+      .find()
+      .where('ends').gt(Date(moment().add('d', -14).toISOString()))
+      .sort({
+        starts: 'asc'
+      });
 
     query
       .exec(function(err, results) {
@@ -23,6 +24,7 @@ router.get('/', function(req, res) {
         }
         res.status(err ? 500 : 200).send(results);
       });
+  }
 });
 
 module.exports = router;
