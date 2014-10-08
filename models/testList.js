@@ -1,5 +1,5 @@
 var mongoose = require('mongoose'),
-    moment = require('moment');
+  moment = require('moment');
 
 var testListSchema = new mongoose.Schema({
   branch: String,

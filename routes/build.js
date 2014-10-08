@@ -2,6 +2,7 @@ var express = require('express'),
   router = express.Router(),
   moment = require('moment'),
   Build = require('../models/build'),
+  Deployment = require('../models/deployment'),
   TestList = require('../models/testList'),
   TestResult = require('../models/testResult');
 
@@ -25,26 +26,14 @@ router.post('/', function(req, res) {
   build.save(function(err) {
     if (err) {
       res.status(500).send(err);
-    }
-    else {
-      TestList.where({'branch':build.branch}).findOne(function(err, testList) {
-        if (err) {
-          res.status(500).send(err);
-        }
-        else {
-          var newItems = [];
-          testList.tests.forEach(function(element) {
-            newItems.push(new TestResult({
-              buildId: build.buildId,
-              suite: element,
-              queued: moment()
-            }));
-          });
+    } else {
+      var deployment = new Deployment({
+        buildId: req.body.buildId,
+        queued: moment()
+      });
 
-          TestResult.create(newItems, function(err) {
-            res.status(err ? 500 : 200).send(err || { success: true });
-          })
-        }
+      deployment.save(function(err, result) {
+        res.status(err ? 500 : 200).send(err || result);
       });
     }
   });

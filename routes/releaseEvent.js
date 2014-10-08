@@ -8,7 +8,7 @@ var express = require('express'),
 router.get('/', function(req, res) {
   var query = ReleaseEvent
     .find()
-    .where('ends').gt(Date(moment().add('d', -14).toISOString()))
+    .where('ends').gt(Date(moment().add(-14, 'd').toISOString()))
     .sort({
       starts: 'asc'
     });
@@ -26,7 +26,9 @@ router.post('/', function(req, res) {
   var releaseEvent = new ReleaseEvent(req.body);
 
   releaseEvent.save(function(err) {
-    res.status(err ? 500 : 200).send(err || { success: true });
+    res.status(err ? 500 : 200).send(err || {
+      success: true
+    });
   });
 })
 

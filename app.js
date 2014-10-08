@@ -22,9 +22,8 @@ app.use(function(req, res, next) {
 });
 
 app.use('/build', require('./routes/build'));
-//app.use('/candidate', require('./routes/candidate'));
-//app.use('/deployment', require('./routes/deployment'));
-//app.use('/testing', require('./routes/testing'));
+app.use('/deployment', require('./routes/deployment'));
+app.use('/testResult', require('./routes/testResult'));
 app.use('/releaseEvent', require('./routes/releaseEvent'));
 //app.use('/weatherForecast', require('./routes/weatherForecast'));
 
