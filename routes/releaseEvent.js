@@ -1,8 +1,7 @@
 var express = require('express'),
   router = express.Router(),
   moment = require('moment'),
-  ReleaseEvent = require('../models/releaseEvent'),
-  Candidate = require('../models/candidate');
+  ReleaseEvent = require('../models/releaseEvent');
 
 // GET /
 router.get('/', function(req, res) {
