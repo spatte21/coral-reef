@@ -7,9 +7,10 @@ var deploymentSchema = new mongoose.Schema({
   started: Date,
   completed: Date,
   environment: String,
-  hrUrl: String,
-  onlineRecruitmentUrl: String,
-  mobileUrl: String,
+  host: String,
+  hrPort: String,
+  orPort: String,
+  moPort: String,
   snapshotName: String,
   snapshotFile: String
 });
