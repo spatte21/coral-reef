@@ -1,6 +1,7 @@
 var express = require('express'),
   router = express.Router(),
   moment = require('moment'),
+  ObjectId = require('mongoose').Types.ObjectId,
   Deployment = require('../models/deployment'),
   Build = require('../models/build'),
   TestConfiguration = require('../models/testConfiguration'),
@@ -44,12 +45,11 @@ router.put('/queue/pop', function(req, res) {
     });
 });
 
-router.get('/:buildId', function(req, res) {
+router.get('/:deploymentId', function(req, res) {
   var query = Deployment
-    .find({
-      'buildId': req.params.buildId
+    .findOne({
+      '_id': new ObjectId(req.params.deploymentId)
     })
-    .sort('started')
     .exec(function(err, result) {
       res.status(err ? 500 : 200).send(err || result);
     });
@@ -71,11 +71,10 @@ router.put('/:buildId', function(req, res) {
       if (err) {
         res.status(500).send(err);
       } else {
-        console.log(deployment.id);
+        var deploymentId = result.id;
         Build.findOne({
           'buildId': req.params.buildId
         }, function(err, build) {
-          console.log(build);
           if (err) {
             res.status(500).send(err);
           } else {
@@ -86,10 +85,10 @@ router.put('/:buildId', function(req, res) {
                 res.status(500).send(err);
               } else {
                 var newItems = [];
-                console.log(testConfig);
                 testConfig.suites.forEach(function(element) {
                   newItems.push(new TestResult({
                     buildId: build.buildId,
+                    deploymentId: deploymentId,
                     module: element.module,
                     submodule: element.submodule,
                     queued: moment()
