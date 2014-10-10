@@ -3,7 +3,6 @@ var express = require('express'),
   moment = require('moment'),
   Build = require('../models/build'),
   Deployment = require('../models/deployment'),
-  TestList = require('../models/testList'),
   TestResult = require('../models/testResult');
 
 router.get('/', function(req, res) {

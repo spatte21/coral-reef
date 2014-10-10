@@ -3,7 +3,7 @@ var express = require('express'),
   moment = require('moment'),
   Deployment = require('../models/deployment'),
   Build = require('../models/build'),
-  TestList = require('../models/testList'),
+  TestConfiguration = require('../models/testConfiguration'),
   TestResult = require('../models/testResult');
 
 router.get('/queue', function(req, res) {
@@ -71,6 +71,7 @@ router.put('/:buildId', function(req, res) {
       if (err) {
         res.status(500).send(err);
       } else {
+        console.log(deployment.id);
         Build.findOne({
           'buildId': req.params.buildId
         }, function(err, build) {
@@ -78,18 +79,19 @@ router.put('/:buildId', function(req, res) {
           if (err) {
             res.status(500).send(err);
           } else {
-            TestList.findOne({
+            TestConfiguration.findOne({
               'branch': build.branch
-            }, function(err, testList) {
+            }, function(err, testConfig) {
               if (err) {
                 res.status(500).send(err);
               } else {
                 var newItems = [];
-                console.log(testList);
-                testList.tests.forEach(function(element) {
+                console.log(testConfig);
+                testConfig.suites.forEach(function(element) {
                   newItems.push(new TestResult({
                     buildId: build.buildId,
-                    suite: element,
+                    module: element.module,
+                    submodule: element.submodule,
                     queued: moment()
                   }));
                 });

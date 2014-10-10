@@ -3,7 +3,8 @@ var mongoose = require('mongoose'),
 
 var testResultSchema = new mongoose.Schema({
   buildId: String,
-  suite: String,
+  module: String,
+  submodule: String,
   queued: Date,
   started: Date,
   completed: Date,
