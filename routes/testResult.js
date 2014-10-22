@@ -14,4 +14,8 @@ router.get('/queue/next', function(req, res) {
     });
 });
 
+router.post('/', function(req, res) {
+  res.status(200).send(req.body);
+});
+
 module.exports = router;
