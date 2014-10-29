@@ -6,4 +6,6 @@ var dbConfig = {
   port: process.env.CUSTOMCONNSTR_PORT
 };
 
+console.log(dbConfig);
+
 module.exports = dbConfig;
