@@ -4,6 +4,7 @@ var dbConfig = require('./db');
 var server;
 
 var port = process.env.PORT || 3000;
+console.log(port);
 
 if (typeof port === 'string' && port.indexOf('pipe') >= 0) {
   server = new Hapi.Server(process.env.PORT, {cors:true});
