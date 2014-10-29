@@ -7,11 +7,11 @@ var port = process.env.PORT || 3000;
 
 if (typeof port === 'string' && port.indexOf('pipe') >= 0) {
   console.log('running on azure...')
-  server = new Hapi.Server(process.env.PORT);
+  server = new Hapi.Server(process.env.PORT, {cors:true});
 }
 else {
   console.log('running locally');
-  server = new Hapi.Server('localhost', 3000);
+  server = new Hapi.Server('localhost', 3000, {cors:true});
 }
 
 server.pack.register({
