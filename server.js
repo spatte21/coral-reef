@@ -2,7 +2,7 @@ var Hapi = require('hapi');
 var moment = require('moment');
 var dbConfig = require('./db');
 
-var server = new Hapi.Server(3000);
+var server = new Hapi.Server(process.env.PORT || 3000);
 
 server.pack.register({
   plugin: require('hapi-mongodb'),
