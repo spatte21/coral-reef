@@ -26,6 +26,7 @@ server.pack.register({
     }
   }
 }, function(err) {
+  console.log('hapi-mongodb registered');
   if (err) {
     console.error(err);
     throw err;
@@ -349,6 +350,8 @@ server.route({
     }
   }
 });
+
+console.log('testing...');
 
 if (!module.parent) {
   server.start(function () {
