@@ -1,13 +1,14 @@
 var Hapi = require('hapi');
 var moment = require('moment');
 var dbConfig = require('./db');
+var server;
 
-var port = process.env.PORT || 3000;
-var host = process.env.HOST || 'localhost';
-console.log(process.env.PORT);
-console.log(process.env.HOST);
-throw process.env.HOST;
-var server = new Hapi.Server(host, port, { cors: true });
+if (process.env.PORT.indexOf('pipe') >= 0) {
+  server = new Hapi.Server(process.env.PORT, {cors:true});
+}
+else {
+  server = new Hapi.Server('localhost', 3000);
+}
 
 server.pack.register({
   plugin: require('hapi-mongodb'),
