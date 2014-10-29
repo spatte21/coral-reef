@@ -352,9 +352,7 @@ server.route({
 });
 
 
-if (!module.parent) {
-  console.log('about to start...');
-
+//if (!module.parent) {
   try {
     server.start(function () {
       console.log('Server running at: ', server.info.uri);
@@ -363,6 +361,6 @@ if (!module.parent) {
   catch (ex) {
     console.log(ex);
   }
-}
+//}
 
 module.exports = server;
