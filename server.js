@@ -4,7 +4,7 @@ var dbConfig = require('./db');
 
 var port = process.env.PORT || 3000;
 var host = process.env.HOST || 'localhost';
-var server = new Hapi.Server(host, port, { cors: true });
+var server = new Hapi.Server(host, parseInt(port), { cors: true });
 
 server.pack.register({
   plugin: require('hapi-mongodb'),
