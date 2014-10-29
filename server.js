@@ -4,7 +4,6 @@ var dbConfig = require('./db');
 var server;
 
 var port = process.env.PORT || 3000;
-console.log(port);
 
 if (typeof port === 'string' && port.indexOf('pipe') >= 0) {
   console.log('running on azure...')
@@ -351,6 +350,20 @@ server.route({
   }
 });
 
+server.route({
+  method: 'GET',
+  path: '/releaseEvent',
+  handler: function(request, reply) {
+    var db = request.server.plugins['hapi-mongodb'].db;
+    db.collection('releaseEvents').find({'ends': { $gt: new Date(moment().add('d', -14).toISOString()) }}).sort({'starts':1}).toArray(function(err, result) {
+      if (err) {
+        return reply(Hapi.error.internal('Internal mongo error', err));
+      }
+
+      reply(result);
+    });
+  }
+});
 
 //if (!module.parent) {
   try {
