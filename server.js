@@ -351,12 +351,18 @@ server.route({
   }
 });
 
-console.log('testing...');
 
 if (!module.parent) {
-  server.start(function () {
-    console.log('Server running at: ', server.info.uri);
-  });
+  console.log('about to start...');
+
+  try {
+    server.start(function () {
+      console.log('Server running at: ', server.info.uri);
+    });
+  }
+  catch (ex) {
+    console.log(ex);
+  }
 }
 
 module.exports = server;
