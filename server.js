@@ -3,7 +3,9 @@ var moment = require('moment');
 var dbConfig = require('./db');
 var server;
 
-if (process.env.PORT.indexOf('pipe') >= 0) {
+var port = process.env.PORT || 3000;
+
+if (typeof port === 'string' && port.indexOf('pipe') >= 0) {
   server = new Hapi.Server(process.env.PORT, {cors:true});
 }
 else {
