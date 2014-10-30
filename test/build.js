@@ -32,10 +32,10 @@ lab.experiment('When a TeamCity build completes...', function() {
           {
             branch: 'develop',
             suites: [
-              { module: 'training', submodule: 'menu-links' },
-              { module: 'payroll', submodule: 'menu-links' },
-              { module: 'administration', submodule: 'menu-links' },
-              { module: 'payroll', submodule: 'calculations' }
+              { module: 'training', suite: 'menu-links' },
+              { module: 'payroll', suite: 'menu-links' },
+              { module: 'administration', suite: 'menu-links' },
+              { module: 'payroll', suite: 'calculations' }
             ]
           }
         ]
@@ -241,7 +241,7 @@ lab.experiment('When a TeamCity build completes...', function() {
       response.statusCode.should.equal(200);
       response.result._id.id.should.equal(tests[0]._id.id);
       response.result.module.should.equal(tests[0].module);
-      response.result.submodule.should.equal(tests[0].submodule);
+      response.result.suite.should.equal(tests[0].suite);
       response.result.buildId.should.equal(tests[0].buildId);
       done();
     });

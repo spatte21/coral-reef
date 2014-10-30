@@ -89,7 +89,7 @@ server.route({
 
         build.deployments = result;
 
-        db.collection('testResults').find({'buildId': build.buildId}).sort({'module':1, 'submodule':1}).toArray(function(err, result) {
+        db.collection('testResults').find({'buildId': build.buildId}).sort({'module':1, 'suite':1}).toArray(function(err, result) {
           if (err) {
             return reply(Hapi.error.internal('Internal mongo error', err));
           }
@@ -131,7 +131,7 @@ server.route({
 
           build.deployments = result;
 
-          db.collection('testResults').find({'buildId': build.buildId}).sort({'module':1, 'submodule':1}).toArray(function(err, result) {
+          db.collection('testResults').find({'buildId': build.buildId}).sort({'module':1, 'suite':1}).toArray(function(err, result) {
             if (err) {
               return reply(Hapi.error.internal('Internal mongo error', err));
             }
@@ -296,7 +296,7 @@ server.route({
                   buildId: deployment.buildId,
                   deploymentId: deployment._id,
                   module: suite.module,
-                  submodule: suite.submodule,
+                  suite: suite.suite,
                   queued: new Date(),
                   status: 'queued'
                 });
@@ -340,7 +340,7 @@ server.route({
   handler: function(request, reply) {
     var db = request.server.plugins['hapi-mongodb'].db;
 
-    db.collection('testResults').find({'status': 'queued'}).sort({'queued': 1, 'module': 1, 'submodule': 1}).toArray(function(err, result) {
+    db.collection('testResults').find({'status': 'queued'}).sort({'queued': 1, 'module': 1, 'suite': 1}).toArray(function(err, result) {
       if (err) {
         return reply(Hapi.error.internal('Internal mongo error', err));
       }
@@ -359,7 +359,7 @@ server.route({
   handler: function(request, reply) {
     var db = request.server.plugins['hapi-mongodb'].db;
 
-    db.collection('testResults').find({'status': 'queued'}, {limit:1}).sort({'queued': 1, 'module': 1, 'submodule': 1}).nextObject(function(err, result) {
+    db.collection('testResults').find({'status': 'queued'}, {limit:1}).sort({'queued': 1, 'module': 1, 'suite': 1}).nextObject(function(err, result) {
       if (err) {
         return reply(Hapi.error.internal('Internal mongo error', err));
       }
@@ -379,7 +379,7 @@ server.route({
     var db = request.server.plugins['hapi-mongodb'].db;
     var test;
 
-    db.collection('testResults').findAndModify({'status': 'queued'}, [['queued', 1], ['module', 1], ['submodule', 1]], {$set:{'status':'testing', 'dequeued': new Date()}}, {'new': true}, function(err, result) {
+    db.collection('testResults').findAndModify({'status': 'queued'}, [['queued', 1], ['module', 1], ['suite', 1]], {$set:{'status':'testing', 'dequeued': new Date()}}, {'new': true}, function(err, result) {
       if (err) {
         return reply(Hapi.error.internal('Internal mongo error', err));
       }
