@@ -11,6 +11,8 @@
   "dependencies": {
     "hapi": "^7.1.1",
     "hapi-mongodb": "^2.2.0",
+    "joi": "^4.7.0",
+    "lout": "^5.1.1",
     "moment": "^2.8.3"
   },
   "devDependencies": {

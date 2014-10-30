@@ -3,8 +3,6 @@ var lab = exports.lab = Lab.script();
 var moment = require('moment');
 var dbConfig = require('../db');
 
-console.log(dbConfig);
-
 var fixtures = require('pow-mongodb-fixtures').connect(dbConfig.db, {
   host: dbConfig.host,
   port: dbConfig.port,
@@ -19,37 +17,36 @@ chai.use(require('chai-datetime'));
 
 var server;
 
-lab.experiment('When a TeamCity build completes', function() {
+lab.experiment('When a TeamCity build completes...', function() {
 
   lab.before(function(done) {
     server = require('../');
-    setTimeout(function() {
-      fixtures.clear(['builds', 'deployments', 'testResults', 'testConfiguration'], function(err) {
+
+    fixtures.clear(['builds', 'deployments', 'testResults', 'testConfiguration'], function(err) {
+      if (err) {
+        console.log(err);
+        throw err;
+      }
+      fixtures.load({
+        testConfiguration: [
+          {
+            branch: 'develop',
+            suites: [
+              { module: 'training', submodule: 'menu-links' },
+              { module: 'payroll', submodule: 'menu-links' },
+              { module: 'administration', submodule: 'menu-links' },
+              { module: 'payroll', submodule: 'calculations' }
+            ]
+          }
+        ]
+      }, function(err) {
         if (err) {
           console.log(err);
           throw err;
         }
-        fixtures.load({
-          testConfiguration: [
-            {
-              branch: 'develop',
-              suites: [
-                { module: 'training', submodule: 'menu-links' },
-                { module: 'payroll', submodule: 'menu-links' },
-                { module: 'administration', submodule: 'menu-links' },
-                { module: 'payroll', submodule: 'calculations' }
-              ]
-            }
-          ]
-        }, function(err) {
-          if (err) {
-            console.log(err);
-            throw err;
-          }
-          done();
-        })
+        done();
       })
-    }, 6000);
+    })
   })
 
   var payload = {
@@ -57,7 +54,7 @@ lab.experiment('When a TeamCity build completes', function() {
     branch: 'develop'
   };
 
-  lab.test('A new build is created', function(done) {
+  lab.test('a new build is created', function(done) {
     server.inject({
       method: 'POST',
       url: '/build',
@@ -73,7 +70,7 @@ lab.experiment('When a TeamCity build completes', function() {
     });
   });
 
-  lab.test('The new build can be retrieved using the id', function(done) {
+  lab.test('the new build can be retrieved using the id', function(done) {
     server.inject({
       method: 'GET',
       url: '/build/' + payload._id
@@ -87,7 +84,7 @@ lab.experiment('When a TeamCity build completes', function() {
     });
   });
 
-  lab.test('The new build is present when retrieving records using the branch', function(done) {
+  lab.test('the new build is present when retrieving records using the branch', function(done) {
     server.inject({
       method: 'GET',
       url: '/build/branch/' + payload.branch
@@ -100,7 +97,7 @@ lab.experiment('When a TeamCity build completes', function() {
     });
   });
 
-  lab.test('A deployment has been created', function(done) {
+  lab.test('a deployment has been created', function(done) {
     server.inject({
       method: 'GET',
       url: '/deployment/' + payload.deployment._id
@@ -114,7 +111,7 @@ lab.experiment('When a TeamCity build completes', function() {
     })
   })
 
-  lab.test('The deployment should be in the queue', function(done) {
+  lab.test('the deployment should be in the queue', function(done) {
     server.inject({
       method: 'GET',
       url: '/deployment/queue'
@@ -127,7 +124,7 @@ lab.experiment('When a TeamCity build completes', function() {
     })
   });
 
-  lab.test('Taking the next deployment off the queue results in the following deployment moving to the top', function(done) {
+  lab.test('taking the next deployment off the queue results in the following deployment moving to the top', function(done) {
     // Stick a second build in the system
     server.inject({
       method: 'POST',
@@ -172,7 +169,7 @@ lab.experiment('When a TeamCity build completes', function() {
 
   var tests = [];
 
-  lab.test('Completing a deployment should result in new tests being placed in the queue', function(done) {
+  lab.test('completing a deployment should result in new tests being placed in the queue', function(done) {
     server.inject({
       method: 'POST',
       url: '/deployment/' + payload._id + '/actions',
@@ -202,7 +199,7 @@ lab.experiment('When a TeamCity build completes', function() {
     })
   });
 
-  lab.test('Taking the next test off the queue results in the following test moving to the top', function(done) {
+  lab.test('taking the next test off the queue results in the following test moving to the top', function(done) {
     server.inject({
       method: 'GET',
       url: '/test/queue/peek'
@@ -236,7 +233,7 @@ lab.experiment('When a TeamCity build completes', function() {
     });
   });
 
-  lab.test('A test can be retrieved using its id', function(done) {
+  lab.test('a test can be retrieved using its id', function(done) {
     server.inject({
       method: 'GET',
       url: '/test/' + tests[0]._id
@@ -250,7 +247,7 @@ lab.experiment('When a TeamCity build completes', function() {
     });
   });
 
-  lab.test('A test can be completed and its results stored', function(done) {
+  lab.test('a test can be completed and its results stored', function(done) {
     server.inject({
       method: 'POST',
       url: '/test/' + payload._id + '/actions',
@@ -267,20 +264,21 @@ lab.experiment('When a TeamCity build completes', function() {
       response.statusCode.should.equal(200);
       response.result.status.should.equal('complete');
       response.result.completed.should.be.afterTime(response.result.queued);
+      payload = response.result;
       done();
     });
   })
 
-  lab.test('Test and deployment information is visible against the build', function(done) {
+  lab.test('test and deployment information is visible against the build', function(done) {
     server.inject({
       method: 'GET',
-      url: '/build/' + payload.buildId
+      url: '/build?buildId=' + payload.buildId
     }, function(response) {
       response.statusCode.should.equal(200);
-      response.deployments.should.be.a('array');
-      response.deployments.length.should.equal(1);
-      response.tests.should.be.a('array');
-      response.tests.length.should.equal(4);
+      response.result.deployments.should.be.a('array');
+      response.result.deployments.length.should.equal(1);
+      response.result.tests.should.be.a('array');
+      response.result.tests.length.should.equal(4);
       done();
     });
   });
