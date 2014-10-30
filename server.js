@@ -339,13 +339,24 @@ server.route({
   path: '/test/queue',
   handler: function(request, reply) {
     var db = request.server.plugins['hapi-mongodb'].db;
+    var test;
 
     db.collection('testResults').find({'status': 'queued'}).sort({'queued': 1, 'module': 1, 'suite': 1}).toArray(function(err, result) {
       if (err) {
         return reply(Hapi.error.internal('Internal mongo error', err));
       }
 
-      reply(result);
+      test = result;
+
+      db.collection('deployments').findOne({'_id': result.deploymentId}, function(err, result) {
+        if (err) {
+          return reply(Hapi.error.internal('Internal mongo error', err));
+        }
+
+        delete test.deploymentId;
+        test.deployment = result;
+        reply(test);
+      });
     });
   },
   config: {
@@ -358,13 +369,24 @@ server.route({
   path: '/test/queue/peek',
   handler: function(request, reply) {
     var db = request.server.plugins['hapi-mongodb'].db;
+    var test;
 
     db.collection('testResults').find({'status': 'queued'}, {limit:1}).sort({'queued': 1, 'module': 1, 'suite': 1}).nextObject(function(err, result) {
       if (err) {
         return reply(Hapi.error.internal('Internal mongo error', err));
       }
 
-      reply(result);
+      test = result;
+
+      db.collection('deployments').findOne({'_id': result.deploymentId}, function(err, result) {
+        if (err) {
+          return reply(Hapi.error.internal('Internal mongo error', err));
+        }
+
+        delete test.deploymentId;
+        test.deployment = result;
+        reply(test);
+      });
     });
   },
   config: {
@@ -408,13 +430,24 @@ server.route({
   handler: function(request, reply) {
     var db = request.server.plugins['hapi-mongodb'].db;
     var ObjectID = request.server.plugins['hapi-mongodb'].ObjectID;
+    var test;
 
     db.collection('testResults').findOne({'_id': new ObjectID(request.params.id)}, function(err, result) {
       if (err) {
         return reply(Hapi.error.internal('Internal mongo error', err));
       }
 
-      reply(result);
+      test = result;
+
+      db.collection('deployments').findOne({'_id': result.deploymentId}, function(err, result) {
+        if (err) {
+          return reply(Hapi.error.internal('Internal mongo error', err));
+        }
+
+        delete test.deploymentId;
+        test.deployment = result;
+        reply(test);
+      });
     });
   },
   config: {
