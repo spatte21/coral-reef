@@ -328,7 +328,8 @@ server.route({
         recruitmentUrl: Joi.string().description('The url of the Online Recruitment application'),
         mobileUrl: Joi.string().description('The url of the Mobile application'),
         snapshotName: Joi.string().description('The name of the data snapshot used in the deployment'),
-        snapshotFile: Joi.string().description('The filename of the data snapshot used in the deployment')
+        snapshotFile: Joi.string().description('The filename of the data snapshot used in the deployment'),
+        octopusDeploymentId: Joi.string().description('The deployment ID in Octopus Deploy')
       }
     }
   }
@@ -469,8 +470,6 @@ server.route({
 
     switch (request.payload.type) {
       case 'complete':
-      default:
-
         delete request.payload.type;
         request.payload.completed = new Date();
         request.payload.status = 'complete';
