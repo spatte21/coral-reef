@@ -270,8 +270,20 @@ server.route({
     var ObjectID = request.server.plugins['hapi-mongodb'].ObjectID;
 
     switch (request.payload.type) {
+
+      case 'failed':
+        delete request.payload.type;
+        request.payload.completed = new Date();
+        request.payload.status = 'failed';
+        db.collection('deployments').findAndModify({'_id': new ObjectID(request.params.id)}, [], {$set: request.payload}, {'new':true}, function(err, result) {
+          if (err) {
+            return reply(Hapi.error.internal('Internal mongo error', err));
+          }
+          reply(result);
+        });
+        break;
+
       case 'complete':
-      default:
 
         delete request.payload.type;
         request.payload.completed = new Date();
@@ -322,7 +334,7 @@ server.route({
         id: Joi.string().description('The unique _id (a mongo ObjectId) of the deployment record')
       },
       payload: {
-        type: Joi.string().regex(/complete/).description('The action to perform. Supported actions: \'complete\''),
+        type: Joi.string().regex(/complete|failed/).description('The action to perform. Supported actions: \'complete|failed\''),
         environment: Joi.string().description('The environment on which the deploy was performed, e.g. Capri'),
         hrUrl: Joi.string().description('The url of the HR application'),
         recruitmentUrl: Joi.string().description('The url of the Online Recruitment application'),
@@ -470,6 +482,7 @@ server.route({
 
     switch (request.payload.type) {
       case 'complete':
+      default:
         delete request.payload.type;
         request.payload.completed = new Date();
         request.payload.status = 'complete';
