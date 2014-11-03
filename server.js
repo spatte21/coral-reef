@@ -506,7 +506,8 @@ server.route({
       },
       payload: {
         type: Joi.string().regex(/complete/).description('The action to perform. Supported actions: \'complete\''),
-        results: Joi.object().description('The results of the test expressed as a string that will parse to a JSON object')
+        results: Joi.object().optional().description('The results of the test expressed as a string that will parse to a JSON object'),
+        resultsText: Joi.string().optional().description('The results of the test expressed as a string (for non-JSON results)')
       }
     }
   }
