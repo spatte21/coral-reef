@@ -283,11 +283,22 @@ server.route({
         });
         break;
 
+      case 'environment-recycled':
+        delete request.payload.type;
+        db.collection('deployments').findAndModify({'_id': new ObjectID(request.params.id)}, [], {$set: {environmentStatus:'recycled'}}, {'new':true}, function(err, result) {
+          if (err) {
+            return reply(Hapi.error.internal('Internal mongo error', err));
+          }
+          reply(result);
+        });
+        break;
+
       case 'complete':
 
         delete request.payload.type;
         request.payload.completed = new Date();
         request.payload.status = 'complete';
+        request.payload.environmentStatus = 'in use';
 
         db.collection('deployments').findAndModify({'_id': new ObjectID(request.params.id)}, [], {$set: request.payload}, {'new':true}, function(err, result) {
           if (err) {
@@ -334,14 +345,44 @@ server.route({
         id: Joi.string().description('The unique _id (a mongo ObjectId) of the deployment record')
       },
       payload: {
-        type: Joi.string().regex(/complete|failed/).description('The action to perform. Supported actions: \'complete|failed\''),
-        environment: Joi.string().description('The environment on which the deploy was performed, e.g. Capri'),
-        hrUrl: Joi.string().description('The url of the HR application'),
-        recruitmentUrl: Joi.string().description('The url of the Online Recruitment application'),
-        mobileUrl: Joi.string().description('The url of the Mobile application'),
-        snapshotName: Joi.string().description('The name of the data snapshot used in the deployment'),
-        snapshotFile: Joi.string().description('The filename of the data snapshot used in the deployment'),
-        octopusDeploymentId: Joi.string().description('The deployment ID in Octopus Deploy')
+        type: Joi.string().regex(/complete|failed|environment-recycled/).description('The action to perform. Supported actions: \'complete\', \'failed\', \'environment-recycled\''),
+        environment: Joi.string().optional().description('The environment on which the deploy was performed, e.g. Capri'),
+        hrUrl: Joi.string().optional().description('The url of the HR application'),
+        recruitmentUrl: Joi.string().optional().description('The url of the Online Recruitment application'),
+        mobileUrl: Joi.string().optional().description('The url of the Mobile application'),
+        snapshotName: Joi.string().optional().description('The name of the data snapshot used in the deployment'),
+        snapshotFile: Joi.string().optional().description('The filename of the data snapshot used in the deployment'),
+        octopusDeploymentId: Joi.string().optional().description('The deployment ID in Octopus Deploy')
+      }
+    }
+  }
+});
+
+server.route({
+  method: 'GET',
+  path: '/deployment',
+  handler: function(request, reply) {
+    var db = request.server.plugins['hapi-mongodb'].db;
+    var environmentStatus = request.query.environmentStatus;
+
+    if (!!environmentStatus) {
+      db.collection('deployments').find({'environmentStatus':environmentStatus}).sort({'queued':1}).toArray(function(err, result) {
+        if (err) {
+          return reply(Hapi.error.internal('Internal mongo error', err));
+        }
+
+        reply(result);
+      });
+    }
+    else {
+      reply([]);
+    }
+  },
+  config: {
+    description: 'Returns deployment records matching the filters supplied on the query string',
+    validate: {
+      query: {
+        environmentStatus: Joi.string().optional().description('If supplied will return the deployment with this environment status, e.g. in use')
       }
     }
   }
@@ -492,7 +533,24 @@ server.route({
             return reply(Hapi.error.internal('Internal mongo error', err));
           }
 
-          reply(result);
+          var testResult = result;
+          db.collection('testResults').find({buildId: result.buildId, status: { $ne: 'complete' }}).toArray(function(err, result) {
+            if (err) {
+              return reply(Hapi.error.internal('Internal mongo error', err));
+            }
+
+            if (result.length === 0) {
+              db.collection('deployments').findAndModify({'_id': new ObjectID(testResult.deploymentId)}, [], {$set: { environmentStatus: 'finished' }}, {'new':true}, function(err, result) {
+                if (err) {
+                  return reply(Hapi.error.internal('Internal mongo error', err));
+                }
+
+                reply(testResult);
+              });
+            }
+
+            reply(testResult);
+          });
         });
 
         break;

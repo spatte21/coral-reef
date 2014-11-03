@@ -20,6 +20,7 @@ var server;
 lab.experiment('When a TeamCity build completes...', function() {
 
   lab.before(function(done) {
+
     server = require('../');
 
     fixtures.clear(['builds', 'deployments', 'testResults', 'testConfiguration'], function(err) {
@@ -44,6 +45,13 @@ lab.experiment('When a TeamCity build completes...', function() {
           console.log(err);
           throw err;
         }
+
+        //// when on a slow connection...
+        //setTimeout(function() {
+        //  console.log('now going...');
+        //  done();
+        //}, 5000);
+
         done();
       })
     })
@@ -267,7 +275,7 @@ lab.experiment('When a TeamCity build completes...', function() {
       payload = response.result;
       done();
     });
-  })
+  });
 
   lab.test('test and deployment information is visible against the build', function(done) {
     server.inject({
@@ -283,4 +291,103 @@ lab.experiment('When a TeamCity build completes...', function() {
     });
   });
 
+  lab.test('environmentStatus only set to available once all tests are complete for that deployment', function(done) {
+    server.inject({
+      method: 'GET',
+      url: '/test/queue'
+    }, function(response) {
+      response.statusCode.should.equal(200);
+      response.result.length.should.equal(3);
+      var remainingTests = response.result;
+
+      server.inject({
+        method: 'POST',
+        url: '/test/' + remainingTests[0]._id + '/actions',
+        payload: {
+          type: 'complete',
+          results: {
+            tests: 10,
+            passes: 10,
+            fails: 0,
+            skipped: 0
+          }
+        }
+      }, function(response) {
+        response.statusCode.should.equal(200);
+
+        server.inject({
+          method: 'POST',
+          url: '/test/' + remainingTests[1]._id + '/actions',
+          payload: {
+            type: 'complete',
+            results: {
+              tests: 10,
+              passes: 10,
+              fails: 0,
+              skipped: 0
+            }
+          }
+        }, function(response) {
+          response.statusCode.should.equal(200);
+
+          server.inject({
+            method: 'POST',
+            url: '/test/' + remainingTests[2]._id + '/actions',
+            payload: {
+              type: 'complete',
+              results: {
+                tests: 10,
+                passes: 10,
+                fails: 0,
+                skipped: 0
+              }
+            }
+          }, function(response) {
+            response.statusCode.should.equal(200);
+
+            server.inject({
+              method: 'GET',
+              url: '/deployment/' + remainingTests[0].deploymentId
+            }, function(response) {
+              response.statusCode.should.equal(200);
+              response.result.environmentStatus.should.equal('finished');
+              done();
+            })
+          });
+        });
+      });
+    });
+  });
+
+  lab.test('deployments that are finished with their environments can be identified', function(done) {
+    server.inject({
+      method: 'GET',
+      url: '/deployment?environmentStatus=finished'
+    }, function(response) {
+      response.statusCode.should.equal(200);
+      response.result.length.should.equal(1);
+      done();
+    });
+  });
+
+  lab.test('a deployment can be updated when its environment is returned to the pool', function(done) {
+    server.inject({
+      method: 'POST',
+      url: '/deployment/' + payload.deploymentId + '/actions',
+      payload: {
+        type: 'environment-recycled'
+      }
+    }, function(response) {
+      response.statusCode.should.equal(200);
+
+      server.inject({
+        method: 'GET',
+        url: '/deployment?environmentStatus=finished'
+      }, function(response) {
+        response.statusCode.should.equal(200);
+        response.result.length.should.equal(0);
+        done();
+      });
+    });
+  });
 });
