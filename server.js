@@ -123,7 +123,7 @@ server.route({
           return reply(Hapi.error.internal('Internal mongo error', err));
         }
 
-        build = result;
+        var build = result;
         db.collection('deployments').find({'buildId':result.buildId}).sort({'queued':1}).toArray(function(err, result) {
           if (err) {
             return reply(Hapi.error.internal('Internal mongo error', err));
@@ -307,32 +307,41 @@ server.route({
 
           // Now get the tests that we need to run for this branch
           var deployment = result;
-          db.collection('testConfiguration').find({branch: deployment.branch}).toArray(function(err, result) {
+
+          db.collection('testConfiguration').find({}).toArray(function(err, result) {
             if (err) {
               return reply(Hapi.error.internal('Internal mongo error', err));
             }
-
             var tests = [];
             result.forEach(function(element) {
-              element.suites.forEach(function(suite) {
-                tests.push({
-                  buildId: deployment.buildId,
-                  deploymentId: deployment._id,
-                  module: suite.module,
-                  suite: suite.suite,
-                  queued: new Date(),
-                  status: 'queued'
+
+              if (deployment.branch.indexOf(result.branch) >= 0) {
+                element.suites.forEach(function(suite) {
+                  tests.push({
+                    buildId: deployment.buildId,
+                    deploymentId: deployment._id,
+                    module: suite.module,
+                    suite: suite.suite,
+                    queued: new Date(),
+                    status: 'queued'
+                  });
                 });
-              });
-            });
-
-            db.collection('testResults').insert(tests, function(err) {
-              if (err) {
-                return reply(Hapi.error.internal('Internal mongo error', err));
+                break;
               }
-
-              reply(deployment);
             });
+
+            if (tests.length > 0) {
+              db.collection('testResults').insert(tests, function (err) {
+                if (err) {
+                  return reply(Hapi.error.internal('Internal mongo error', err));
+                }
+
+                reply(deployment);
+              });
+            }
+            else {
+              reply(deployment);
+            }
           });
         });
         break;
