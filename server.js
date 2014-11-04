@@ -315,7 +315,7 @@ server.route({
             var tests = [];
             result.forEach(function(element) {
 
-              if (deployment.branch.indexOf(result.branch) >= 0) {
+              if (deployment.branch.indexOf(element.branch) >= 0) {
                 element.suites.forEach(function(suite) {
                   tests.push({
                     buildId: deployment.buildId,
@@ -326,7 +326,6 @@ server.route({
                     status: 'queued'
                   });
                 });
-                break;
               }
             });
 
@@ -439,17 +438,22 @@ server.route({
         return reply(Hapi.error.internal('Internal mongo error', err));
       }
 
-      test = result;
+      if (!result) {
+        reply([]);
+      }
+      else {
+        test = result;
 
-      db.collection('deployments').findOne({'_id': result.deploymentId}, function(err, result) {
-        if (err) {
-          return reply(Hapi.error.internal('Internal mongo error', err));
-        }
+        db.collection('deployments').findOne({'_id': result.deploymentId}, function (err, result) {
+          if (err) {
+            return reply(Hapi.error.internal('Internal mongo error', err));
+          }
 
-        delete test.deploymentId;
-        test.deployment = result;
-        reply(test);
-      });
+          delete test.deploymentId;
+          test.deployment = result;
+          reply(test);
+        });
+      }
     });
   },
   config: {

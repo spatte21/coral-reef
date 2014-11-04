@@ -47,12 +47,12 @@ lab.experiment('When a TeamCity build completes...', function() {
         }
 
         //// when on a slow connection...
-        //setTimeout(function() {
-        //  console.log('now going...');
-        //  done();
-        //}, 5000);
+        setTimeout(function() {
+          console.log('now going...');
+          done();
+        }, 5000);
 
-        done();
+        //done();
       })
     })
   })
