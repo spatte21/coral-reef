@@ -9,10 +9,10 @@ var azure = false;
 
 if (typeof port === 'string' && port.indexOf('pipe') >= 0) {
   azure = true;
-  server = new Hapi.Server(process.env.PORT, {cors:true});
+  server = new Hapi.Server(process.env.PORT, {cors:{origin:['*']}});
 }
 else {
-  server = new Hapi.Server('localhost', 3000, {cors:true});
+  server = new Hapi.Server('localhost', 3000, {cors:{origin:['*']}});
 }
 
 server.route({
