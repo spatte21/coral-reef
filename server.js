@@ -2,6 +2,7 @@ var Hapi = require('hapi');
 var moment = require('moment');
 var dbConfig = require('./db');
 var Joi = require('joi');
+var _ = require('lodash');
 var server;
 
 var port = process.env.PORT || 3000;
@@ -37,22 +38,39 @@ server.route({
 
       returnData = result[0];
 
-      // Now insert a deployment record to join the queue
-      db.collection('deployments').insert({
-        buildId: request.payload.buildId,
-        branch: request.payload.branch,
-        queued: new Date(),
-        status: 'queued'
-      }, function(err, result) {
+      // Find the snapshot we need to use for this build
+      db.collection('dataConfiguration').find({branch:{$in:[returnData.branch,'default']}}).toArray(function(err, result) {
         if (err) {
           return reply(Hapi.error.internal('Internal mongo error', err));
         }
-        if (result.length <= 0) {
-          return reply(Hapi.error.internal('No records created'));
+        else if (result.length == 0) {
+          return reply(Hapi.error.internal('No data configuration for this branch', err));
         }
 
-        returnData.deployment = result[0];
-        reply(returnData);
+        var snapshot = _.find(result, {branch:returnData.branch});
+        if (!snapshot) {
+          snapshot = _.find(result, {branch:'default'});
+        }
+
+        // Now insert a deployment record to join the queue
+        db.collection('deployments').insert({
+          buildId: request.payload.buildId,
+          branch: request.payload.branch,
+          queued: new Date(),
+          snapshotName: snapshot.snapshotName,
+          snapshotFile: snapshot.snapshotFile,
+          status: 'queued'
+        }, function(err, result) {
+          if (err) {
+            return reply(Hapi.error.internal('Internal mongo error', err));
+          }
+          if (result.length <= 0) {
+            return reply(Hapi.error.internal('No records created'));
+          }
+
+          returnData.deployment = result[0];
+          reply(returnData);
+        });
       });
     });
   },

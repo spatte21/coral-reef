@@ -23,7 +23,7 @@ lab.experiment('When a TeamCity build completes...', function() {
 
     server = require('../');
 
-    fixtures.clear(['builds', 'deployments', 'testResults', 'testConfiguration'], function(err) {
+    fixtures.clear(['builds', 'deployments', 'testResults', 'testConfiguration', 'dataConfiguration'], function(err) {
       if (err) {
         console.log(err);
         throw err;
@@ -39,6 +39,18 @@ lab.experiment('When a TeamCity build completes...', function() {
               { module: 'payroll', suite: 'calculations' }
             ]
           }
+        ],
+        dataConfiguration: [
+          {
+            branch: 'develop',
+            snapshotName: 'develop_snapshot',
+            snapshotFile: 'develop_file'
+          },
+          {
+            branch: 'default',
+            snapshotName: 'default_snapshot',
+            snapshotFile: 'default_file'
+          }
         ]
       }, function(err) {
         if (err) {
@@ -46,7 +58,7 @@ lab.experiment('When a TeamCity build completes...', function() {
           throw err;
         }
 
-        //// when on a slow connection...
+        // when on a slow connection...
         //setTimeout(function() {
         //  console.log('now going...');
         //  done();
@@ -73,6 +85,7 @@ lab.experiment('When a TeamCity build completes...', function() {
       response.result.buildId.should.equal(payload.buildId);
       response.result.branch.should.equal(payload.branch);
       response.result.deployment.should.not.be.null;
+      response.result.deployment.snapshotName.should.equal('develop_snapshot');
       payload = response.result;
       done();
     });
@@ -139,9 +152,12 @@ lab.experiment('When a TeamCity build completes...', function() {
       url: '/build',
       payload: {
         buildId: '5.2.9760',
-        branch: 'develop'
+        branch: 'hr/hr-3231'
       }
     }, function(response) {
+      response.statusCode.should.equal(200);
+      response.result.deployment.snapshotName.should.equal('default_snapshot');
+
       var second_build_payload = response.result;
 
       server.inject({
