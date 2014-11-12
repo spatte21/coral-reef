@@ -22,32 +22,37 @@ BuildController.prototype = (function() {
     query: function query(request, reply) {
       var helper = new ReplyHelper(request, reply);
       var params = request.plugins.createControllerParams(request);
-      params.query = {};
-      params.sort = {
-        startTime: 1
-      };
+      var query = {};
 
       if (!!params.branch) {
-        params.query.branch = params.branch;
+        query.branch = params.branch;
       }
 
       if (!!params.buildId) {
-        params.query.buildId = params.buildId;
+        query.buildId = params.buildId;
       }
 
-      buildDAO.find(params, function(err, data) {
-        helper.replyFind(err, data);
+      _.assign(params, {
+        query: query,
+        sort: { startTime: 1 }
       });
+
+      buildDAO.find(params, helper.replyFind.bind(helper));
     },
 
     insert: function insert(request, reply) {
-
       var helper = new ReplyHelper(request, reply);
       var params = request.plugins.createControllerParams(request);
 
-      buildDAO.insert(params, function(err, data) {
-        helper.replyInsert(err, data);
+      _.assign(params, {
+        insert: {
+          buildId: params.buildId,
+          branch: params.branch,
+          startTime: new Date()
+        }
       });
+
+      buildDAO.insert(params, helper.replyInsert.bind(helper));
     }
   };
 

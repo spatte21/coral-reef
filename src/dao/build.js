@@ -1,6 +1,9 @@
 'use strict';
 
 var _ = require('lodash');
+var dataConfigurationDAO = require('./dataConfiguration');
+var deploymentDAO = require('./deployment');
+var testConfigurationDAO = require('./testConfiguration');
 
 function BuildDAO(){};
 BuildDAO.prototype = (function() {
@@ -12,89 +15,72 @@ BuildDAO.prototype = (function() {
         .findOne({_id: new params.ObjectID(params.id)}, callback);
     },
 
-    findOne: function findOne(params, callback) {
-      var db = params.db;
-      var query = params.query;
-      var build;
-
-      db.collection('builds').findOne(query, function (err, result) {
-        if (err) {
-          callback(err, null);
-        }
-
-        build = result;
-        db.collection('deployments').find({buildId: build.buildId}).sort({'queued': 1}).toArray(function (err, result) {
-          if (err) {
-            callback(err, null);
-          }
-
-          build.deployments = result;
-          db.collection('testResults').find({buildId: build._id}).sort({
-            module: 1,
-            suite: 1
-          }).toArray(function (err, result) {
-            if (err) {
-              callback(err, null);
-            }
-
-            build.tests = result;
-            callback(null, build);
-          });
-        })
-      });
-    },
-
     find: function find(params, callback) {
       var db = params.db;
-      var query = params.query;
-      var sort = params.sort;
-
-      db.collection('builds').find(query).sort(sort).toArray(callback);
+      db.collection('builds')
+        .find(params.query)
+        .sort(params.sort)
+        .toArray(callback);
     },
 
     insert: function insert(params, callback) {
       var db = params.db;
-      var build = {
-        buildId: params.buildId,
-        branch: params.branch,
-        startTime: new Date()
-      };
-
-      db.collection('builds').insert(build, function (err, result) {
-        if (err) {
-          callback(err, null);
-        }
-
-        db.collection('dataConfiguration').find({branch: {$in: [params.branch, 'default']}}).toArray(function (err, result) {
+      db.collection('builds')
+        .insert(params.insert, function (err, data) {
           if (err) {
             callback(err, null);
           }
 
-          var snapshot = _.find(result, {branch: params.branch});
-          if (!snapshot) {
-            snapshot = _.find(result, {branch: 'default'});
-          }
+          var build = _.first(data);
 
-          var deployment = {
-            buildId: params.buildId,
-            branch: params.branch,
-            queued: new Date(),
-            snapshotName: snapshot.snapshotName,
-            snapshotFile: snapshot.snapshotFile,
-            status: 'queued'
-          };
+          // we only need to proceed with a queued deployment if there are tests configured for this branch
+          testConfigurationDAO.findByBranch(params, function(err, data) {
 
-          db.collection('deployments').insert(deployment, function (err, result) {
             if (err) {
               callback(err, null);
             }
+            else if (!!data && data.length > 0) {
+              _.assign(params, {
+                query: { branch: {$in: [params.branch, 'default']} },
+                sort: {}
+              });
 
-            build.deployments = result;
-            callback(null, build);
-          });
+              dataConfigurationDAO.find(params, function(err, data) {
+                if (err) {
+                  callback(err, null);
+                }
+
+                var snapshot = _.find(data, {branch: params.branch});
+                if (!snapshot) {
+                  snapshot = _.find(data, {branch: 'default'});
+                }
+
+                _.assign(params, {
+                  insert: {
+                    buildId: params.buildId,
+                    branch: params.branch,
+                    queued: new Date(),
+                    snapshotName: snapshot.snapshotName,
+                    snapshotFile: snapshot.snapshotFile,
+                    status: 'queued'
+                  }
+                });
+
+                deploymentDAO.insert(params, function(err, data) {
+                  if (err) {
+                    callback(err, null);
+                  }
+
+                  build.deployments = data;
+                  callback(null, build);
+                });
+              });
+            }
+            else {
+              callback(null, build);
+            }
+          })
         });
-
-      });
     }
   };
 })();

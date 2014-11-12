@@ -10,6 +10,26 @@ TestConfigurationDAO.prototype = (function() {
         .find(params.query)
         .sort(params.sort)
         .toArray(callback);
+    },
+
+    findByBranch: function findByBranch(params, callback) {
+      var db = params.db;
+      db.collection('testConfiguration')
+        .find({})
+        .toArray(function(err, data) {
+          if (err) {
+            callback(err, null);
+          }
+          else {
+            var testConfigs = [];
+            data.forEach(function (element) {
+              if (params.branch.indexOf(element.branch) >= 0) {
+                testConfigs.push(element);
+              }
+            });
+            callback(null, testConfigs);
+          }
+        });
     }
   };
 

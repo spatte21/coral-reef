@@ -1,13 +1,12 @@
 var Lab = require('lab');
 var lab = exports.lab = Lab.script();
-var moment = require('moment');
-var dbConfig = require('../db');
+var constants = require('../src/config/constants');
 
-var fixtures = require('pow-mongodb-fixtures').connect(dbConfig.db, {
-  host: dbConfig.host,
-  port: dbConfig.port,
-  user: dbConfig.username,
-  pass: dbConfig.password
+var fixtures = require('pow-mongodb-fixtures').connect(constants.database.database, {
+  host: constants.database.host,
+  port: constants.database.port,
+  user: constants.database.user,
+  pass: constants.database.password
 });
 
 var chai = require('chai');
@@ -33,8 +32,14 @@ lab.experiment('When a TeamCity build completes...', function() {
           {
             branch: 'develop',
             suites: [
-              { module: 'training', suite: 'menu-links' },
-              { module: 'payroll', suite: 'menu-links' },
+              {module: 'training', suite: 'menu-links'},
+              {module: 'payroll', suite: 'menu-links'},
+              {module: 'payroll', suite: 'calculations'}
+            ]
+          },
+          {
+            branch: 'hr/',
+            suites: [
               { module: 'administration', suite: 'menu-links' },
               { module: 'payroll', suite: 'calculations' }
             ]
@@ -216,7 +221,7 @@ lab.experiment('When a TeamCity build completes...', function() {
       }, function(response) {
         response.statusCode.should.equal(200);
         response.result.should.be.a('array');
-        response.result.length.should.equal(4);
+        response.result.length.should.equal(3);
         tests = response.result;
         done();
       });
@@ -312,7 +317,7 @@ lab.experiment('When a TeamCity build completes...', function() {
       url: '/test/queue'
     }, function(response) {
       response.statusCode.should.equal(200);
-      response.result.length.should.equal(3);
+      response.result.length.should.equal(2);
       var remainingTests = response.result;
 
       server.inject({
@@ -346,28 +351,12 @@ lab.experiment('When a TeamCity build completes...', function() {
           response.statusCode.should.equal(200);
 
           server.inject({
-            method: 'POST',
-            url: '/test/' + remainingTests[2]._id + '/actions',
-            payload: {
-              type: 'complete',
-              results: {
-                tests: 10,
-                passes: 10,
-                fails: 0,
-                skipped: 0
-              }
-            }
+            method: 'GET',
+            url: '/deployment/' + remainingTests[0].deploymentId
           }, function(response) {
             response.statusCode.should.equal(200);
-
-            server.inject({
-              method: 'GET',
-              url: '/deployment/' + remainingTests[0].deploymentId
-            }, function(response) {
-              response.statusCode.should.equal(200);
-              response.result.environmentStatus.should.equal('finished');
-              done();
-            })
+            response.result.environmentStatus.should.equal('finished');
+            done();
           });
         });
       });

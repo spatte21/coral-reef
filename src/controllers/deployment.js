@@ -17,9 +17,7 @@ DeploymentController.prototype = (function() {
         sort: { queued: 1 }
       });
 
-      deploymentDAO.find(params, function(err, data) {
-        helper.replyFind(err, data);
-      });
+      deploymentDAO.find(params, helper.replyFind.bind(helper));
     },
 
     queuePop: function queuePop(request, reply) {
@@ -31,9 +29,7 @@ DeploymentController.prototype = (function() {
         update: { status: 'deploying', dequeued: new Date() }
       });
 
-      deploymentDAO.update(params, function(err, data) {
-        helper.replyUpdate(err, data);
-      });
+      deploymentDAO.update(params, helper.replyUpdate.bind(helper));
     },
 
     queuePeek: function queuePeek(request, reply) {
@@ -44,9 +40,7 @@ DeploymentController.prototype = (function() {
         sort: { queued: 1 }
       });
 
-      deploymentDAO.findFirst(params, function(err, data) {
-        helper.replyFindFirst(err, data);
-      });
+      deploymentDAO.findFirst(params, helper.replyFindFirst.bind(helper));
     },
 
     performAction: function performAction(request, reply) {
@@ -60,10 +54,8 @@ DeploymentController.prototype = (function() {
             sort: [],
             update: { completed: new Date(), status: params.type }
           });
-          deploymentDAO.update(params, function(err, data) {
-            helper.replyUpdate(err, data);
-          });
 
+          deploymentDAO.update(params, helper.replyUpdate.bind(helper));
           break;
 
         case 'environment-recycled':
@@ -72,10 +64,8 @@ DeploymentController.prototype = (function() {
             sort: [],
             update: { environmentStatus: 'recycled' }
           });
-          deploymentDAO.update(params, function(err, data) {
-            helper.replyUpdate(err, data);
-          });
 
+          deploymentDAO.update(params, helper.replyUpdate.bind(helper));
           break;
 
         case 'complete':
@@ -95,49 +85,8 @@ DeploymentController.prototype = (function() {
               octopusDeploymentId: params.octopusDeploymentId
             }
           });
-          deploymentDAO.update(params, function(err, data) {
 
-            var deployment = data;
-            params.query = {};
-            if (!err) {
-              testConfigurationDAO.find(params, function (err, data) {
-
-                var tests = [];
-                data.forEach(function (element) {
-                  if (deployment.branch.indexOf(element.branch) >= 0) {
-                    element.suites.forEach(function (suite) {
-                      tests.push({
-                        buildId: deployment.buildId,
-                        deploymentId: deployment._id,
-                        module: suite.module,
-                        suite: suite.suite,
-                        queued: new Date(),
-                        status: 'queued'
-                      });
-                    });
-                  }
-                });
-
-                if (tests.length > 0) {
-                  _.assign(params, {
-                    insert: tests
-                  });
-                  testDAO.insert(params, function (err) {
-                    helper.replyUpdate(err, deployment);
-                  });
-                }
-                else {
-                  //set environment status as complete
-                  // atually do this before we deploy
-                  helper.replyUpdate(err, deployment);
-                }
-              });
-            }
-            else {
-              helper.replyUpdate(err, deployment);
-            }
-          });
-
+          deploymentDAO.update(params, helper.replyUpdate.bind(helper));
           break;
       }
 

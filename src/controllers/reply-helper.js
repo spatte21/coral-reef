@@ -13,7 +13,7 @@ ReplyHelper.prototype.replyFindOne = function replyFindOne(err, data) {
     this.reply(data);
   }
   else {
-    this.reply().code(404);
+    this.reply(Hapi.error.notFound('No record found'));
   }
 };
 
@@ -25,7 +25,7 @@ ReplyHelper.prototype.replyFindFirst = function replyFindFirst(err, data) {
     this.reply(data[0]);
   }
   else {
-    this.reply().code(404);
+    this.reply(Hapi.error.notFound('No record found'));
   }
 };
 
@@ -50,6 +50,9 @@ ReplyHelper.prototype.replyInsert = function replyInsert(err, data) {
 ReplyHelper.prototype.replyUpdate = function replyUpdate(err, data) {
   if (err) {
     return this.reply(Hapi.error.badImplementation(err));
+  }
+  else if (!data) {
+    this.reply(Hapi.error.notFound('No record found'));
   }
   else {
     this.reply(data);

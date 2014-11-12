@@ -2,7 +2,6 @@
 
 var ReplyHelper = require('./reply-helper');
 var testDAO = require('../dao/test');
-var deploymentDAO = require('../dao/deployment');
 var _ = require('lodash');
 
 function TestController(){};
@@ -28,19 +27,7 @@ TestController.prototype = (function() {
         sort: { queued: 1, module: 1, suite: 1 }
       });
 
-      testDAO.findFirst(params, function(err, data) {
-        var test = data;
-        if (!!test) {
-          _.assign(params, { id: test.deploymentId });
-          deploymentDAO.findById(params, function(err, data) {
-            test.deployment = data;
-            helper.replyFindOne(err, test);
-          })
-        }
-        else {
-          helper.replyFindOne(err, test);
-        }
-      });
+      testDAO.findFirst(params, helper.replyFindOne.bind(helper));
     },
 
     queuePop: function queuePop(request, reply) {
@@ -52,19 +39,7 @@ TestController.prototype = (function() {
         update: { status: 'testing', dequeued: new Date() }
       });
 
-      testDAO.update(params, function(err, data) {
-        var test = data;
-        if (!!test) {
-          _.assign(params, { id: test.deploymentId });
-          deploymentDAO.findById(params, function(err, data) {
-            test.deployment = data;
-            helper.replyUpdate(err, test);
-          })
-        }
-        else {
-          helper.replyUpdate(err, test);
-        }
-      });
+      testDAO.update(params, helper.replyUpdate.bind(helper));
     },
 
     findById: function findById(request, reply) {
@@ -74,19 +49,7 @@ TestController.prototype = (function() {
         query: { _id: new params.ObjectID(params.id) }
       });
 
-      testDAO.findById(params, function(err, data) {
-        var test = data;
-        if (!!test) {
-          _.assign(params, { id: test.deploymentId });
-          deploymentDAO.findById(params, function(err, data) {
-            test.deployment = data;
-            helper.replyFindOne(err, test);
-          })
-        }
-        else {
-          helper.replyFindOne(err, test);
-        }
-      });
+      testDAO.findById(params, helper.replyFindOne.bind(helper));
     },
 
     performAction: function performAction(request, reply) {
@@ -107,35 +70,7 @@ TestController.prototype = (function() {
             }
           });
 
-          testDAO.update(params, function(err, data) {
-            var test = data;
-            if (!!test) {
-              _.assign(params, {
-                query: {buildId: test.buildId, status: {$ne: 'complete'}},
-                sort: {}
-              });
-              testDAO.find(params, function(err, data) {
-                if (data.length === 0) {
-                  _.assign(params, {
-                    query: {_id: new params.ObjectID(test.deploymentId)},
-                    sort: [],
-                    update: {environmentStatus: 'finished'}
-                  });
-
-                  deploymentDAO.update(params, function(err, data) {
-                    helper.replyUpdate(err, test);
-                  })
-                }
-                else {
-                  helper.replyUpdate(err, test);
-                }
-              })
-            }
-            else {
-              helper.replyUpdate(err, test);
-            }
-          });
-
+          testDAO.update(params, helper.replyUpdate.bind(helper));
           break;
       }
     }
