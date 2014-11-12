@@ -1,5 +1,6 @@
 'use strict';
 
+var Joi = require('joi');
 var buildController = require('../controllers/build');
 
 module.exports = function() {
@@ -22,12 +23,29 @@ module.exports = function() {
     {
       method: 'GET',
       path: '/build/{id}',
-      handler: buildController.findById
+      handler: buildController.findById,
+      config: {
+        description: 'Returns a specific build record with the supplied internal _id',
+        validate: {
+          params: {
+            id: Joi.string().description('The unique _id (a mongo ObjectId) of the build record')
+          }
+        }
+      }
     },
     {
       method: 'GET',
       path: '/build',
-      handler: buildController.query
-    }
+      handler: buildController.query,
+      config: {
+        description: 'Returns build records matching the filters supplied on the query string',
+        validate: {
+          query: {
+            buildId: Joi.string().optional().description('If supplied will return the build with this buildId, e.g. 5.1.4343'),
+            branch: Joi.string().optional().description('If supplied will return builds belonging to this branch, e.g. develop')
+          }
+        }
+      }
+    },
   ];
 }();
