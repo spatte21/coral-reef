@@ -298,19 +298,6 @@ lab.experiment('When a TeamCity build completes...', function() {
     });
   });
 
-  lab.test('test and deployment information is visible against the build', function(done) {
-    server.inject({
-      method: 'GET',
-      url: '/build?buildId=' + payload.buildId
-    }, function(response) {
-      response.statusCode.should.equal(200);
-      //response.result.deployments.length.should.equal(1);
-      //response.result.tests.should.be.a('array');
-      //response.result.tests.length.should.equal(4);
-      done();
-    });
-  });
-
   lab.test('environmentStatus only set to available once all tests are complete for that deployment', function(done) {
     server.inject({
       method: 'GET',

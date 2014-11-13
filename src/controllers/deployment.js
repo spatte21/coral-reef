@@ -5,6 +5,7 @@ var deploymentDAO = require('../dao/deployment');
 var testConfigurationDAO = require('../dao/testConfiguration');
 var testDAO = require('../dao/test');
 var _ = require('lodash');
+var Q = require('q')
 
 function DeploymentController(){};
 DeploymentController.prototype = (function() {
@@ -97,7 +98,7 @@ DeploymentController.prototype = (function() {
               reply(Hapi.error.badRequest(result.exception));
               done();
             }
-
+            params.branch = result.branch;
             return findTests(params);
 
           }).then(function(data) {
@@ -110,8 +111,8 @@ DeploymentController.prototype = (function() {
             data.forEach(function (element) {
               element.suites.forEach(function (suite) {
                 tests.push({
-                  buildId: deployment.buildId,
-                  deploymentId: deployment._id,
+                  buildId: result.buildId,
+                  deploymentId: result._id,
                   module: suite.module,
                   suite: suite.suite,
                   queued: new Date(),
@@ -127,7 +128,7 @@ DeploymentController.prototype = (function() {
 
           }).then(function(data) {
             if (data.exception) {
-              reply(Hapi.error.badRequest(result.exception));
+              reply(Hapi.error.badRequest(data.exception));
             }
             else {
               reply(result);

@@ -2,7 +2,11 @@
 
 var ReplyHelper = require('./reply-helper');
 var buildDAO = require('../dao/build');
+var testConfigurationDAO = require('../dao/testConfiguration');
+var dataConfigurationDAO = require('../dao/dataConfiguration');
+var deploymentDAO = require('../dao/deployment');
 var _ = require('lodash');
+var Q = require('q');
 
 function BuildController(){};
 BuildController.prototype = (function() {
@@ -27,7 +31,6 @@ BuildController.prototype = (function() {
     },
 
     insert: function insert(request, reply) {
-      var helper = new ReplyHelper(request, reply);
       var params = request.plugins.createControllerParams(request);
 
       var result;
