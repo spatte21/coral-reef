@@ -18,7 +18,7 @@ TestController.prototype = (function() {
         sort: { queued: 1, module: 1, suite: 1 }
       });
 
-      testDAO.find(params, helper.replyFind.bind(helper));
+      testDAO.find(params, helper.replyQueue.bind(helper));
     },
 
     queuePeek: function queuePeek(request, reply) {

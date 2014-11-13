@@ -18,7 +18,7 @@ DeploymentController.prototype = (function() {
         sort: { queued: 1 }
       });
 
-      deploymentDAO.find(params, helper.replyFind.bind(helper));
+      deploymentDAO.find(params, helper.replyQueue.bind(helper));
     },
 
     queuePop: function queuePop(request, reply) {

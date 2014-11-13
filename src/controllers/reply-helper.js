@@ -5,6 +5,18 @@ function ReplyHelper(request, reply) {
   this.reply = reply;
 };
 
+ReplyHelper.prototype.replyQueue = function replyQueue(err, data) {
+  if (err) {
+    return this.reply(Hapi.error.badImplementation(err));
+  }
+  else if (!!data && data.length > 0) {
+    this.reply(data);
+  }
+  else {
+    this.reply([]);
+  }
+};
+
 ReplyHelper.prototype.replyFindOne = function replyFindOne(err, data) {
   if (err) {
     return this.reply(Hapi.error.badImplementation(err));
