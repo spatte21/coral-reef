@@ -3,6 +3,7 @@
 var ReplyHelper = require('./reply-helper');
 var releaseEventDAO = require('../dao/releaseEvent');
 var _ = require('lodash');
+var moment = require('moment');
 
 function ReleaseEventController(){};
 ReleaseEventController.prototype = (function() {
