@@ -1,7 +1,6 @@
 'use strict';
 
 var _ = require('lodash');
-var DeploymentDAO = require('./deployment');
 var deploymentDAO = new DeploymentDAO();
 
 _.forIn(deploymentDAO, function(v,k) {

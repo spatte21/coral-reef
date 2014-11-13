@@ -8,8 +8,7 @@ DataConfigurationDAO.prototype = (function() {
     find: function find(params, callback) {
       var db = params.db;
       db.collection('dataConfiguration')
-        .find(params.query)
-        .sort(params.sort)
+        .find({ branch: {$in: [params.branch, 'default']} })
         .toArray(callback);
     }
 

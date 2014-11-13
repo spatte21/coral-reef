@@ -36,7 +36,7 @@ module.exports = function() {
     {
       method: 'GET',
       path: '/build',
-      handler: buildController.query,
+      handler: buildController.find,
       config: {
         description: 'Returns build records matching the filters supplied on the query string',
         validate: {

@@ -1,9 +1,5 @@
 'use strict';
 
-var testConfigurationDAO = require('./testConfiguration');
-var testDAO = require('./test');
-var _ = require('lodash');
-
 function DeploymentDAO(){};
 DeploymentDAO.prototype = (function() {
 
@@ -43,41 +39,6 @@ DeploymentDAO.prototype = (function() {
             if (err) {
               callback(err, null);
             }
-
-            if (params.type === 'complete') {
-              var deployment = data;
-              _.assign(params, {branch: deployment.branch});
-              testConfigurationDAO.findByBranch(params, function(err, data) {
-                if (err) {
-                  callback(err, null);
-                }
-
-                var tests = [];
-                data.forEach(function (element) {
-                  element.suites.forEach(function (suite) {
-                    tests.push({
-                      buildId: deployment.buildId,
-                      deploymentId: deployment._id,
-                      module: suite.module,
-                      suite: suite.suite,
-                      queued: new Date(),
-                      status: 'queued'
-                    });
-                  });
-                });
-
-                _.assign(params, {
-                  insert: tests
-                });
-                testDAO.insert(params, function (err) {
-                  if (err) {
-                    callback(err, null);
-                  }
-
-                  callback(null, deployment);
-                });
-              });
-            }
             else {
               callback(null, data);
             }
@@ -93,6 +54,5 @@ DeploymentDAO.prototype = (function() {
 
 })();
 
-//var deploymentDAO = new DeploymentDAO();
-//module.exports = deploymentDAO;
-module.exports = DeploymentDAO;
+var deploymentDAO = new DeploymentDAO();
+module.exports = deploymentDAO;

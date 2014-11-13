@@ -1,9 +1,6 @@
 'use strict';
 
 var _ = require('lodash');
-var dataConfigurationDAO = require('./dataConfiguration');
-var deploymentDAO = require('./deployment');
-var testConfigurationDAO = require('./testConfiguration');
 
 function BuildDAO(){};
 BuildDAO.prototype = (function() {
@@ -17,9 +14,24 @@ BuildDAO.prototype = (function() {
 
     find: function find(params, callback) {
       var db = params.db;
+      var query = {};
+
+      if (!!params.branch) {
+        query.branch = params.branch;
+      }
+
+      if (!!params.buildId) {
+        query.buildId = params.buildId;
+      }
+
+      _.assign(params, {
+        query: query,
+        sort: { startTime: 1 }
+      });
+
       db.collection('builds')
-        .find(params.query)
-        .sort(params.sort)
+        .find(query)
+        .sort({startTime: 1})
         .toArray(callback);
     },
 
@@ -30,56 +42,9 @@ BuildDAO.prototype = (function() {
           if (err) {
             callback(err, null);
           }
-
-          var build = _.first(data);
-
-          // we only need to proceed with a queued deployment if there are tests configured for this branch
-          testConfigurationDAO.findByBranch(params, function(err, data) {
-
-            if (err) {
-              callback(err, null);
-            }
-            else if (!!data && data.length > 0) {
-              _.assign(params, {
-                query: { branch: {$in: [params.branch, 'default']} },
-                sort: {}
-              });
-
-              dataConfigurationDAO.find(params, function(err, data) {
-                if (err) {
-                  callback(err, null);
-                }
-
-                var snapshot = _.find(data, {branch: params.branch});
-                if (!snapshot) {
-                  snapshot = _.find(data, {branch: 'default'});
-                }
-
-                _.assign(params, {
-                  insert: {
-                    buildId: params.buildId,
-                    branch: params.branch,
-                    queued: new Date(),
-                    snapshotName: snapshot.snapshotName,
-                    snapshotFile: snapshot.snapshotFile,
-                    status: 'queued'
-                  }
-                });
-
-                deploymentDAO.insert(params, function(err, data) {
-                  if (err) {
-                    callback(err, null);
-                  }
-
-                  build.deployments = data;
-                  callback(null, build);
-                });
-              });
-            }
-            else {
-              callback(null, build);
-            }
-          })
+          else {
+            callback(null, _.first(data));
+          }
         });
     }
   };
