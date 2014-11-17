@@ -59,7 +59,7 @@ BuildDAO.prototype = (function() {
 
       db.collection('builds')
         .find(query)
-        .sort({startTime: 1})
+        .sort({startTime: -1})
         .toArray(callback);
     },
 
