@@ -37,7 +37,7 @@ module.exports = function() {
         description: 'General purpose endpoint for performing actions against a deployment record, e.g. completing it',
         validate: {
           params: {
-            id: Joi.string().description('The unique _id (a mongo ObjectId) of the deployment record')
+            id: Joi.string().description('The buildId to which the deployment record relates')
           },
           payload: {
             type: Joi.string().regex(/complete|failed|environment-recycled/).description('The action to perform. Supported actions: \'complete\', \'failed\', \'environment-recycled\''),
@@ -45,8 +45,6 @@ module.exports = function() {
             hrUrl: Joi.string().optional().description('The url of the HR application'),
             recruitmentUrl: Joi.string().optional().description('The url of the Online Recruitment application'),
             mobileUrl: Joi.string().optional().description('The url of the Mobile application'),
-            snapshotName: Joi.string().optional().description('The name of the data snapshot used in the deployment'),
-            snapshotFile: Joi.string().optional().description('The filename of the data snapshot used in the deployment'),
             octopusDeploymentId: Joi.string().optional().description('The deployment ID in Octopus Deploy')
           }
         }
@@ -73,6 +71,8 @@ module.exports = function() {
         description: 'Returns deployment records matching the filters supplied on the query string',
         validate: {
           query: {
+            status: Joi.string().optional().description('If supplied will return deployments with this status'),
+            buildId: Joi.string().optional().description('If supplied will return deployments with this buildId'),
             environmentStatus: Joi.string().optional().description('If supplied will return the deployment with this environment status, e.g. in use')
           }
         }

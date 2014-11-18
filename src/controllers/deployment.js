@@ -10,6 +10,7 @@ var Q = require('q')
 function transformToDeployment(record) {
   if (!!record) {
     return {
+      _id: record._id,
       buildId: record.buildId,
       branch: record.branch,
       queued: record.deployment.queued,
@@ -174,23 +175,30 @@ DeploymentController.prototype = (function() {
         query: {_id: new params.ObjectID(params.id) }
       });
 
-      deploymentDAO.findById(params, helper.replyFindOne.bind(helper));
+      deploymentDAO.findById(params, function(err, data) {
+        helper.replyFindOne(err, transformToDeployment(data));
+      });
     },
 
     query: function query(request, reply) {
       var helper = new ReplyHelper(request, reply);
       var params = request.plugins.createControllerParams(request);
       params.query = {};
-      params.sort = {
-        queued: 1
-      };
 
       if (!!params.environmentStatus) {
-        params.query.environmentStatus = params.environmentStatus;
+        params.query['deployment.environmentStatus'] = params.environmentStatus;
+      }
+
+      if (!!params.status) {
+        params.query['deployment.status'] = params.status;
+      }
+
+      if (!!params.buildId) {
+        params.query['buildId'] = params.buildId;
       }
 
       deploymentDAO.find(params, function(err, data) {
-        helper.replyFind(err, data);
+        helper.replyFind(err, _.map(data, transformToDeployment));
       });
     }
   };
