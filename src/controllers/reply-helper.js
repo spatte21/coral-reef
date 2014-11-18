@@ -37,7 +37,7 @@ ReplyHelper.prototype.replyFindFirst = function replyFindFirst(err, data) {
     this.reply(data[0]);
   }
   else {
-    this.reply(Hapi.error.notFound('No record found'));
+    this.reply(null).code(204);
   }
 };
 
@@ -74,6 +74,18 @@ ReplyHelper.prototype.replyRemove = function replyRemove(err, data) {
   }
   else if (data === 0) {
     return this.reply(Hapi.error.notFound('No record found'));
+  }
+  else {
+    this.reply(data);
+  }
+};
+
+ReplyHelper.prototype.replyQueueItem = function replyUpdate(err, data) {
+  if (err) {
+    return this.reply(Hapi.error.badImplementation(err));
+  }
+  else if (!data) {
+    this.reply(null).code(204);
   }
   else {
     this.reply(data);

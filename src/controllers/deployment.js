@@ -7,6 +7,22 @@ var testDAO = require('../dao/test');
 var _ = require('lodash');
 var Q = require('q')
 
+function transformToDeployment(record) {
+  if (!!record) {
+    return {
+      buildId: record.buildId,
+      branch: record.branch,
+      queued: record.deployment.queued,
+      status: record.deployment.status,
+      snapshotFile: record.deployment.snapshotFile,
+      snapshotName: record.deployment.snapshotFile
+    };
+  }
+  else {
+    return null;
+  }
+};
+
 function DeploymentController(){};
 DeploymentController.prototype = (function() {
   return {
@@ -14,34 +30,42 @@ DeploymentController.prototype = (function() {
       var helper = new ReplyHelper(request, reply);
       var params = request.plugins.createControllerParams(request);
       _.assign(params, {
-        query: { status: 'queued' },
-        sort: { queued: 1 }
+        query: { 'deployment.status': 'queued'},
+        fields: { buildId:1, branch:1, deployment:1 },
+        sort: [[ 'deployment.queued',1 ]]
       });
 
-      deploymentDAO.find(params, helper.replyQueue.bind(helper));
+      deploymentDAO.find(params, function(err, data) {
+        helper.replyQueue(err, _.map(data, transformToDeployment));
+      });
     },
 
     queuePop: function queuePop(request, reply) {
       var helper = new ReplyHelper(request, reply);
       var params = request.plugins.createControllerParams(request);
       _.assign(params, {
-        query: { status: 'queued' },
-        sort: [['queued', 1]],
-        update: { status: 'deploying', dequeued: new Date() }
+        query: { 'deployment.status': 'queued'},
+        sort: [['deployment.queued', 1]],
+        update: { 'deployment.status': 'deploying', 'deployment.dequeued': new Date() }
       });
 
-      deploymentDAO.update(params, helper.replyUpdate.bind(helper));
+      deploymentDAO.update(params, function(err, data) {
+        helper.replyQueueItem(err, transformToDeployment(data));
+      });
     },
 
     queuePeek: function queuePeek(request, reply) {
       var helper = new ReplyHelper(request, reply);
       var params = request.plugins.createControllerParams(request);
       _.assign(params, {
-        query: { status: 'queued' },
-        sort: { queued: 1 }
+        query: { 'deployment.status': 'queued'},
+        fields: { buildId:1, branch:1, deployment:1 },
+        sort: [[ 'deployment.queued',1 ]]
       });
 
-      deploymentDAO.findFirst(params, helper.replyFindFirst.bind(helper));
+      deploymentDAO.findFirst(params, function(err, data) {
+        helper.replyQueueItem(err, transformToDeployment(data));
+      });
     },
 
     performAction: function performAction(request, reply) {

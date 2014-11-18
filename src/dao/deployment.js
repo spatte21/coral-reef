@@ -13,27 +13,26 @@ DeploymentDAO.prototype = (function() {
 
     find: function find(params, callback) {
       var db = params.db;
-      db.collection('deployments')
-        .find(params.query)
-        .sort(params.sort)
+
+      db.collection('builds')
+        .find(params.query, {fields: params.fields, sort: params.sort})
         .toArray(callback);
     },
 
     findFirst: function findFirst(params, callback) {
       var db = params.db;
-      db.collection('deployments')
-        .find(params.query, {limit:1})
-        .sort(params.sort)
-        .toArray(callback);
+      db.collection('builds')
+        .find(params.query, {fields: params.fields, sort: params.sort, limit:1})
+        .nextObject(callback);
     },
 
     update: function update(params, callback) {
       var db = params.db;
-      db.collection('deployments')
+      db.collection('builds')
         .findAndModify(
           params.query,
           params.sort,
-          {$set: params.update},
+          {$set: params.update },
           {'new': true},
           function(err, data) {
             if (err) {
