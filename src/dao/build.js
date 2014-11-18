@@ -8,41 +8,8 @@ BuildDAO.prototype = (function() {
   return {
     findById: function findById(params, callback) {
       var db = params.db;
-      var result;
-
       db.collection('builds')
-        .findOne({_id: new params.ObjectID(params.id)}, function(err, data) {
-          result = data;
-          if (err) {
-            callback(err, null);
-          }
-
-          if (!!data) {
-            db.collection('deployments')
-              .find({buildId: result.buildId})
-              .toArray(function (err, data) {
-                if (err) {
-                  callback(err, null);
-                }
-
-                result.deployments = data;
-
-                db.collection('testResults')
-                  .find({buildId: result.buildId})
-                  .toArray(function (err, data) {
-                    if (err) {
-                      callback(err, null);
-                    }
-
-                    result.tests = data;
-                    callback(null, result);
-                  })
-              });
-          }
-          else {
-            callback(null, data);
-          }
-        });
+        .findOne({_id: new params.ObjectID(params.id)}, callback);
     },
 
     find: function find(params, callback) {

@@ -38,7 +38,8 @@ lab.experiment('When testing the deployment route...', function() {
               status: 'complete',
               snapshotFile: 'a',
               snapshotName: 'b'
-            }
+            },
+            messages: []
           },
           {
             _id: id('546a30f78888d194e188bdd7'),
@@ -50,19 +51,48 @@ lab.experiment('When testing the deployment route...', function() {
               status: 'queued',
               snapshotFile: 'c',
               snapshotName: 'd'
-            }
+            },
+            messages: []
           },
           {
             buildId: '5.6',
             branch: 'three',
             status: 'deployment queued',
             deployment: {
-
               queued: moment().add(-1, 'm').toISOString(),
               status: 'queued',
               snapshotFile: 'e',
               snapshotName: 'f'
-            }
+            },
+            messages: []
+          },
+          {
+            _id: id('123a30f78888d194e188bdd7'),
+            buildId: '7.8',
+            branch: 'three',
+            status: 'deploying',
+            deployment: {
+              queued: moment().add(-12, 'm').toISOString(),
+              status: 'deploying',
+              snapshotFile: 'g',
+              snapshotName: 'h'
+            },
+            messages: []
+          }
+        ],
+        testConfiguration: [
+          {
+            branch: 'two',
+            suites: [
+              {module: 'training', suite: 'menu-links'},
+              {module: 'payroll', suite: 'calculations'}
+            ]
+          },
+          {
+            branch: 'hr/',
+            suites: [
+              { module: 'payroll', suite: 'calculations' }
+            ]
           }
         ]
       }, function(err) {
@@ -153,6 +183,8 @@ lab.experiment('When testing the deployment route...', function() {
       response.statusCode.should.equal(200);
       response.result.should.be.a('object');
       response.result.buildId.should.equal('3.4');
+      response.result.status.should.equal('deploying');
+      var id = response.result._id;
 
       server.inject({
         method: 'GET',
@@ -160,7 +192,15 @@ lab.experiment('When testing the deployment route...', function() {
       }, function(response) {
         response.result.length.should.equal(1);
         response.result.should.not.contain.a.thing.with.property('buildId', '3.4');
-        done();
+
+        server.inject({
+          method: 'GET',
+          url: '/build/' + id
+        }, function(response) {
+          response.statusCode.should.equal(200);
+          response.result.messages.should.contain.an.item.with.property('description', 'Deployment started');
+          done();
+        });
       });
     });
   });
@@ -215,7 +255,7 @@ lab.experiment('When testing the deployment route...', function() {
     }, function(response) {
       response.statusCode.should.equal(200);
       response.result.should.be.a('array');
-      response.result.length.should.equal(2);
+      response.result.length.should.equal(3);
       done();
     });
   });
@@ -237,7 +277,7 @@ lab.experiment('When testing the deployment route...', function() {
   lab.test('deployments can be updated when complete', function(done) {
     server.inject({
       method: 'POST',
-      url: '/deployment/546a30f78888d194e188bdd7/action',
+      url: '/deployment/546a30f78888d194e188bdd7/actions',
       payload: {
         type: 'complete',
         environment: 'capri',
@@ -250,29 +290,69 @@ lab.experiment('When testing the deployment route...', function() {
         response.statusCode.should.equal(200);
         response.result.should.be.a('object');
         response.result.status.should.equal('complete');
+        response.result.environmentStatus.should.equal('in use');
+        response.result.mobileUrl.should.equal('http://testsite.com:86');
 
         server.inject({
           method: 'GET',
-          url: '/build?buildid=3.4'
+          url: '/build/546a30f78888d194e188bdd7'
         }, function(response) {
           response.statusCode.should.equal(200);
           response.result.status.should.equal('tests queued');
-
-          server.inject({
-            method: 'GET',
-            url: '/test?buildId='
-          })
+          response.result.tests.should.be.a('array');
+          response.result.tests.length.should.equal(2);
+          response.result.tests[0].status.should.equal('queued');
+          response.result.messages.should.contain.an.item.with.property('description', 'Deployment completed');
+          done();
         });
-
-
     });
   });
-  
-  //lab.test('deployments can be updated when failed')
-  //
-  //lab.test('deployments can be updated when cancelled')
-  //
-  //lab.test('deployments can be updated when their environment has been recycled')
+
+  lab.test('deployments can be updated when failed', function(done) {
+    server.inject({
+      method: 'POST',
+      url: '/deployment/123a30f78888d194e188bdd7/actions',
+      payload: {
+        type: 'failed'
+      }
+    }, function(response) {
+      response.statusCode.should.equal(200);
+      response.result.should.be.a('object');
+      response.result.status.should.equal('failed');
+
+      server.inject({
+        method: 'GET',
+        url: '/build/123a30f78888d194e188bdd7'
+      }, function(response) {
+        response.statusCode.should.equal(200);
+        response.result.messages.should.contain.an.item.with.property('description', 'Deployment failed');
+        done();
+      });
+    });
+  });
+
+  lab.test('deployments can be updated when their environment has been recycled', function(done) {
+    server.inject({
+      method: 'POST',
+      url: '/deployment/546a30f78888d194e188bdd7/actions',
+      payload: {
+        type: 'environment-recycled'
+      }
+    }, function(response) {
+      response.statusCode.should.equal(200);
+      response.result.should.be.a('object');
+      response.result.environmentStatus.should.equal('recycled');
+
+      server.inject({
+        method: 'GET',
+        url: '/build/546a30f78888d194e188bdd7'
+      }, function(response) {
+        response.statusCode.should.equal(200);
+        response.result.messages.should.contain.an.item.with.property('description', 'Deployment environment recycled');
+        done();
+      });
+    })
+  });
 
 });
 

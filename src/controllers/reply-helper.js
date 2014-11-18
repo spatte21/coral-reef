@@ -85,7 +85,7 @@ ReplyHelper.prototype.replyQueueItem = function replyUpdate(err, data) {
     return this.reply(Hapi.error.badImplementation(err));
   }
   else if (!data) {
-    this.reply(null).code(204);
+    return this.reply(null).code(204);
   }
   else {
     this.reply(data);
@@ -97,7 +97,7 @@ ReplyHelper.prototype.replyUpdate = function replyUpdate(err, data) {
     return this.reply(Hapi.error.badImplementation(err));
   }
   else if (!data) {
-    this.reply(Hapi.error.notFound('No record found'));
+    return this.reply(Hapi.error.notFound('No record found'));
   }
   else {
     this.reply(data);

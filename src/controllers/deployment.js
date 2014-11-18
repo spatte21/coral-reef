@@ -3,7 +3,7 @@
 var ReplyHelper = require('./reply-helper');
 var deploymentDAO = require('../dao/deployment');
 var testConfigurationDAO = require('../dao/testConfiguration');
-var testDAO = require('../dao/test');
+var buildDAO = require('../dao/build');
 var _ = require('lodash');
 var Q = require('q')
 
@@ -16,7 +16,13 @@ function transformToDeployment(record) {
       queued: record.deployment.queued,
       status: record.deployment.status,
       snapshotFile: record.deployment.snapshotFile,
-      snapshotName: record.deployment.snapshotFile
+      snapshotName: record.deployment.snapshotFile,
+      environment: record.deployment.environment,
+      environmentStatus: record.deployment.environmentStatus || null,
+      hrUrl: record.deployment.hrUrl || null,
+      recruitmentUrl: record.deployment.recruitmentUrl || null,
+      mobileUrl: record.deployment.mobileUrl || null,
+      octopusDeploymentId: record.deployment.octopusDeploymentId || null
     };
   }
   else {
@@ -45,9 +51,12 @@ DeploymentController.prototype = (function() {
       var helper = new ReplyHelper(request, reply);
       var params = request.plugins.createControllerParams(request);
       _.assign(params, {
-        query: { 'deployment.status': 'queued'},
+        query: { 'deployment.status':'queued' },
         sort: [['deployment.queued', 1]],
-        update: { 'deployment.status': 'deploying', 'deployment.dequeued': new Date() }
+        update: {
+          $set: {'deployment.status':'deploying', 'deployment.dequeued':new Date()},
+          $push: {messages: {type:'info', description: 'Deployment started', timestamp: new Date()}}
+        }
       });
 
       deploymentDAO.update(params, function(err, data) {
@@ -78,87 +87,104 @@ DeploymentController.prototype = (function() {
           _.assign(params, {
             query: { _id: new params.ObjectID(params.id) },
             sort: [],
-            update: { completed: new Date(), status: params.type }
+            update: {
+              $set: {
+                status: 'failed',
+                'deployment.status': 'failed',
+                'deployment.completed': new Date()
+              },
+              $push: {messages: {type:'error', description: 'Deployment failed', timestamp: new Date()}}
+            }
           });
 
-          deploymentDAO.update(params, helper.replyUpdate.bind(helper));
+          deploymentDAO.update(params, function(err, data) {
+            helper.replyUpdate(err, transformToDeployment(data));
+          });
           break;
 
         case 'environment-recycled':
           _.assign(params, {
             query: { _id: new params.ObjectID(params.id) },
             sort: [],
-            update: { environmentStatus: 'recycled' }
+            update: {
+              $set: {'deployment.environmentStatus': 'recycled'},
+              $push: {messages: {type:'info', description: 'Deployment environment recycled', timestamp: new Date()}}
+            }
           });
 
-          deploymentDAO.update(params, helper.replyUpdate.bind(helper));
+          deploymentDAO.update(params, function(err, data) {
+            helper.replyUpdate(err, transformToDeployment(data));
+          });
           break;
 
         case 'complete':
-          _.assign(params, {
-            query: { _id: new params.ObjectID(params.id) },
-            sort: [],
-            update: {
-              completed: new Date(),
-              status: params.type,
-              environment: params.environment,
-              environmentStatus: 'in use',
-              hrUrl: params.hrUrl,
-              recruitmentUrl: params.recruitmentUrl,
-              mobileUrl: params.mobileUrl,
-              snapshotName: params.snapshotName,
-              snapshotFile: params.snapshotFile,
-              octopusDeploymentId: params.octopusDeploymentId
-            }
-          });
 
-          var update = Q.nfbind(deploymentDAO.update);
+          var update = {
+            'deployment.status': params.type,
+            'deployment.completed': new Date(),
+            'deployment.environment': params.environment,
+            'deployment.hrUrl': params.hrUrl,
+            'deployment.recruitmentUrl': params.recruitmentUrl,
+            'deployment.mobileUrl': params.mobileUrl,
+            'deployment.octopusDeploymentId': params.octopusDeploymentId
+          };
+
+          var findBuild = Q.nfbind(buildDAO.findById);
           var findTests = Q.nfbind(testConfigurationDAO.findByBranch);
-          var insertTests = Q.nfbind(testDAO.insert);
-          var result;
+          var updateBuild = Q.nfbind(deploymentDAO.update);
 
-          update(params).then(function(data) {
-            result = data;
-            if (result.exception) {
-              reply(Hapi.error.badRequest(result.exception));
+          findBuild(params).then(function(data) {
+            if (data.exception) {
+              reply(Hapi.error.badRequest(data.exception));
               done();
             }
-            params.branch = result.branch;
+
+            params.branch = data.branch;
             return findTests(params);
 
           }).then(function(data) {
-            if (data.exception) {
-              reply(Hapi.error.badRequest(result.exception));
-              done();
-            }
+            var tests = data;
 
-            var tests = [];
-            data.forEach(function (element) {
-              element.suites.forEach(function (suite) {
-                tests.push({
-                  buildId: result.buildId,
-                  deploymentId: result._id,
-                  module: suite.module,
-                  suite: suite.suite,
-                  queued: new Date(),
-                  status: 'queued'
+            if (!!tests && tests.length > 0) {
+              update.status = 'tests queued';
+              update['deployment.environmentStatus'] = 'in use';
+              update.tests = [];
+              tests.forEach(function (element) {
+                element.suites.forEach(function (suite) {
+                  update.tests.push({
+                    module: suite.module,
+                    suite: suite.suite,
+                    queued: new Date(),
+                    status: 'queued'
+                  });
                 });
               });
-            });
+            }
+            else {
+              update.status = 'not for testing';
+              update['deployment.environmentStatus'] = 'finished';
+            }
 
             _.assign(params, {
-              insert: tests
+              query: { _id: new params.ObjectID(params.id) },
+              sort: [],
+              update: {
+                $set: update,
+                $push: {messages: {type:'info', description: 'Deployment completed', timestamp: new Date()}}
+              }
             });
-            return insertTests(params);
+
+            return updateBuild(params);
 
           }).then(function(data) {
             if (data.exception) {
               reply(Hapi.error.badRequest(data.exception));
             }
             else {
-              reply(result);
+              reply(transformToDeployment(data));
             }
             done();
+
           }).catch(function(err) {
             reply(Hapi.error.badImplementation(err));
           });

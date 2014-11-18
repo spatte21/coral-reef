@@ -72,11 +72,16 @@ BuildController.prototype = (function() {
             snapshotFile: snapshot.snapshotFile,
             status: 'queued'
           };
+          newBuild.messages.push({
+            type: 'info',
+            description: 'Deployment queued',
+            timestamp: new Date()
+          });
         }
         else {
           newBuild.status = 'not for testing';
           newBuild.messages.push({
-            type: 'information',
+            type: 'warning',
             description: 'There were no tests configured to be run against this branch',
             timestamp: new Date()
           });

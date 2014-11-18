@@ -31,7 +31,7 @@ DeploymentDAO.prototype = (function() {
         .findAndModify(
           params.query,
           params.sort,
-          {$set: params.update },
+          params.update,
           {'new': true},
           function(err, data) {
             if (err) {
