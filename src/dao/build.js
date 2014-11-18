@@ -17,26 +17,31 @@ BuildDAO.prototype = (function() {
             callback(err, null);
           }
 
-          db.collection('deployments')
-            .find({buildId: result.buildId})
-            .toArray(function(err, data) {
-              if (err) {
-                callback(err, null);
-              }
+          if (!!data) {
+            db.collection('deployments')
+              .find({buildId: result.buildId})
+              .toArray(function (err, data) {
+                if (err) {
+                  callback(err, null);
+                }
 
-              result.deployments = data;
+                result.deployments = data;
 
-              db.collection('testResults')
-                .find({buildId: result.buildId})
-                .toArray(function(err, data) {
-                  if (err) {
-                    callback(err, null);
-                  }
+                db.collection('testResults')
+                  .find({buildId: result.buildId})
+                  .toArray(function (err, data) {
+                    if (err) {
+                      callback(err, null);
+                    }
 
-                  result.tests = data;
-                  callback(null, result);
-                })
-            })
+                    result.tests = data;
+                    callback(null, result);
+                  })
+              });
+          }
+          else {
+            callback(null, data);
+          }
         });
     },
 
@@ -66,14 +71,13 @@ BuildDAO.prototype = (function() {
     insert: function insert(params, callback) {
       var db = params.db;
       db.collection('builds')
-        .insert(params.insert, function (err, data) {
-          if (err) {
-            callback(err, null);
-          }
-          else {
-            callback(null, _.first(data));
-          }
-        });
+        .insert(params.insert, callback);
+    },
+
+    remove: function remove(params, callback) {
+      var db = params.db;
+      db.collection('builds')
+        .remove({_id: new params.ObjectID(params.id)}, {}, callback);
     }
   };
 })();

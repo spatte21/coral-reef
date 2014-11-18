@@ -10,6 +10,12 @@ ReleaseEventDAO.prototype = (function() {
         .find(params.query)
         .sort(params.sort)
         .toArray(callback);
+    },
+
+    insert: function insert(params, callback) {
+      var db = params.db;
+      db.collection('releaseEvents')
+        .insert(params.insert, callback);
     }
   };
 

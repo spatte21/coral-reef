@@ -4,7 +4,6 @@ var ReplyHelper = require('./reply-helper');
 var buildDAO = require('../dao/build');
 var testConfigurationDAO = require('../dao/testConfiguration');
 var dataConfigurationDAO = require('../dao/dataConfiguration');
-var deploymentDAO = require('../dao/deployment');
 var _ = require('lodash');
 var Q = require('q');
 
@@ -30,76 +29,71 @@ BuildController.prototype = (function() {
       buildDAO.find(params, helper.replyFind.bind(helper));
     },
 
-    insert: function insert(request, reply) {
+    remove: function remove(request, reply) {
+      var helper = new ReplyHelper(request, reply);
       var params = request.plugins.createControllerParams(request);
 
-      var result;
+      buildDAO.remove(params, helper.replyRemove.bind(helper));
+    },
+
+    insert: function insert(request, reply) {
+      var params = request.plugins.createControllerParams(request);
       var insertBuild = Q.nfbind(buildDAO.insert);
       var findTests = Q.nfbind(testConfigurationDAO.findByBranch);
       var findData = Q.nfbind(dataConfigurationDAO.find);
-      var insertDeployment = Q.nfbind(deploymentDAO.insert);
 
-      _.assign(params, {
-        insert: {
-          buildId: params.buildId,
-          branch: params.branch,
-          startTime: new Date()
-        }
-      });
+      var newBuild = {
+        buildId: params.buildId,
+        branch: params.branch,
+        startTime: new Date(),
+        messages: []
+      };
 
-      insertBuild(params).then(function(data) {
-        result = data;
-        if (result.exception) {
-          reply(Hapi.error.badRequest(result.exception));
-          done();
-        }
-        return findTests(params);
+      var configuredTests;
+      var snapshotData;
+
+      findTests(params).then(function(data) {
+        configuredTests = data;
+        return findData(params);
 
       }).then(function(data) {
-        // make sure there are some tests to run
-        if (!!data && data.length > 0) {
-          return findData(params);
-        }
-        else {
-          // No need to do anything else as there are no tests configured for this branch
-          reply(result);
-          done();
-        }
+        snapshotData = data;
 
-      }).then(function(data) {
-        // get the snapshot data files we should use for this branch
-        if (data.exception) {
-          reply(Hapi.error.badRequest(data.exception));
-          done();
-        }
+        if (!!configuredTests && configuredTests.length > 0) {
+          var snapshot = _.find(snapshotData, {branch: params.branch});
+          if (!snapshot) {
+            snapshot = _.find(snapshotData, {branch: 'default'});
+          }
 
-        var snapshot = _.find(data, {branch: params.branch});
-        if (!snapshot) {
-          snapshot = _.find(data, {branch: 'default'});
-        }
-
-        _.assign(params, {
-          insert: {
-            buildId: params.buildId,
-            branch: params.branch,
+          newBuild.status = 'deployment queued';
+          newBuild.deployment = {
             queued: new Date(),
             snapshotName: snapshot.snapshotName,
             snapshotFile: snapshot.snapshotFile,
             status: 'queued'
-          }
-        });
-        return insertDeployment(params);
+          };
+        }
+        else {
+          newBuild.status = 'not for testing';
+          newBuild.messages.push({
+            type: 'information',
+            description: 'There were no tests configured to be run against this branch',
+            timestamp: new Date()
+          });
+        }
+
+        _.assign(params, { insert: newBuild });
+        return insertBuild(params);
 
       }).then(function(data) {
-        // return if all is well
         if (data.exception) {
           reply(Hapi.error.badRequest(data.exception));
         }
         else {
-          result.deployments = data;
-          reply(result);
+          reply(data[0]);
         }
         done();
+
       }).catch(function(err) {
         reply(Hapi.error.badImplementation(err));
       });

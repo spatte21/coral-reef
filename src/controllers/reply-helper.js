@@ -50,9 +50,30 @@ ReplyHelper.prototype.replyFind = function replyFind(err, data) {
   }
 };
 
-ReplyHelper.prototype.replyInsert = function replyInsert(err, data) {
+ReplyHelper.prototype.replyInsertOne = function replyInsertOne(err, data) {
   if (err) {
     return this.reply(Hapi.error.badImplementation(err));
+  }
+  else {
+    this.reply(data[0]);
+  }
+};
+
+ReplyHelper.prototype.replyInsertMany = function replyInsertMany(err, data) {
+  if (err) {
+    return this.reply(Hapi.error.badImplementation(err));
+  }
+  else {
+    this.reply(data);
+  }
+};
+
+ReplyHelper.prototype.replyRemove = function replyRemove(err, data) {
+  if (err) {
+    return this.reply(Hap.error.badImplementation(err));
+  }
+  else if (data === 0) {
+    return this.reply(Hapi.error.notFound('No record found'));
   }
   else {
     this.reply(data);
