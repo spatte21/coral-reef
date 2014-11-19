@@ -53,9 +53,23 @@ module.exports = function() {
             id: Joi.string().description('The unique _id (a mongo ObjectId) of the test record')
           },
           payload: {
-            type: Joi.string().regex(/complete/).description('The action to perform. Supported actions: \'complete\''),
+            type: Joi.string().regex(/complete|cancelled/).description('The action to perform. Supported actions: \'complete\', \'cancelled\''),
             results: Joi.object().optional().description('The results of the test expressed as a string that will parse to a JSON object'),
             resultsText: Joi.string().optional().description('The results of the test expressed as a string (for non-JSON results)')
+          }
+        }
+      }
+    },
+    {
+      method: 'GET',
+      path: '/test',
+      handler: testController.query,
+      config: {
+        description: 'Returns test records matching the filters supplied on the query string',
+        validate: {
+          query: {
+            status: Joi.string().optional().description('If supplied will return test with this status'),
+            buildId: Joi.string().optional().description('If supplied will return tests with this buildId')
           }
         }
       }

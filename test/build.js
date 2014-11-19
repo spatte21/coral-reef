@@ -242,4 +242,5 @@ lab.experiment('When testing the build route...', function() {
     })
   });
 
+//  lab.test('a build can be cancelled while in progress')
 });

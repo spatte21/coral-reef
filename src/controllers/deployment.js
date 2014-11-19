@@ -54,7 +54,7 @@ DeploymentController.prototype = (function() {
         query: { 'deployment.status':'queued' },
         sort: [['deployment.queued', 1]],
         update: {
-          $set: {'deployment.status':'deploying', 'deployment.dequeued':new Date()},
+          $set: {status: 'deploying', 'deployment.status':'deploying', 'deployment.dequeued':new Date()},
           $push: {messages: {type:'info', description: 'Deployment started', timestamp: new Date()}}
         }
       });

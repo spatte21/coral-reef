@@ -8,85 +8,53 @@ TestDAO.prototype = (function() {
   return {
     findById: function findById(params, callback) {
       var db = params.db;
-      db.collection('testResults')
-        .findOne({_id: new params.ObjectID(params.id)}, function(err, data) {
-          if (err) {
-            callback(err, null);
-          }
-
-          var test = data;
-          if (!!test) {
-            db.collection('deployments')
-              .findOne({_id: new params.ObjectID(test.deploymentId)}, function (err, data) {
-                if (err) {
-                  callback(err, null);
-                }
-
-                test.deployment = data;
-                callback(null, test);
-              });
-          }
-          else {
-            callback(null, test);
-          }
+      db.collection('builds')
+        .aggregate([
+          {$unwind: '$tests'},
+          {$match: params.query}
+        ], function(err, data) {
+          callback(err, _.first(data));
         });
     },
 
     find: function find(params, callback) {
       var db = params.db;
-      db.collection('testResults')
-        .find(params.query)
-        .sort(params.sort)
-        .toArray(callback);
+      db.collection('builds')
+        .aggregate([
+          {$unwind: '$tests'},
+          {$match: params.query},
+          {$sort: params.sort}
+        ], function(err, data) {
+          callback(err, data);
+        });
     },
 
     findFirst: function findFirst(params, callback) {
       var db = params.db;
-      db.collection('testResults')
-        .find(params.query, {limit:1})
-        .sort(params.sort)
-        .toArray(function(err, data) {
-          if (err) {
-            callback(err, null);
-          }
-
-          var test = _.first(data);
-          if (!!test) {
-            db.collection('deployments')
-              .findOne({_id: new params.ObjectID(test.deploymentId)}, function (err, data) {
-                if (err) {
-                  callback(err, null);
-                }
-
-                test.deployment = data;
-                callback(null, test);
-              });
-          }
-          else {
-            callback(null, test);
-          }
+      db.collection('builds')
+        .aggregate([
+          {$unwind: '$tests'},
+          {$match: params.query},
+          {$sort: params.sort}
+        ], function(err, data) {
+          callback(err, _.first(data));
         });
-    },
-
-    insert: function insert(params, callback) {
-      var db = params.db;
-      db.collection('testResults')
-        .insert(params.insert, callback);
     },
 
     update: function update(params, callback) {
       var db = params.db;
-      db.collection('testResults')
+      db.collection('builds')
         .findAndModify(
           params.query,
           params.sort,
-          {$set: params.update},
+          params.update,
           {new: true},
           function(err, data) {
             if (err) {
               callback(err, null);
             }
             else {
+              data.tests = _.find(data.tests, {_id: params.testId});
               callback(null, data);
             }
           });

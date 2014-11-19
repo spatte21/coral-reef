@@ -22,7 +22,7 @@ lab.experiment('When testing the deployment route...', function() {
 
   lab.before(function(done) {
     server = require('../');
-    fixtures.clear(['builds'], function(err) {
+    fixtures.clear(['builds', 'testConfiguration'], function(err) {
       if (err) {
         console.log(err);
         throw err;
@@ -108,7 +108,7 @@ lab.experiment('When testing the deployment route...', function() {
     });
   });
 
-  lab.test('new deployments are queued in date order', function(done) {
+  lab.test('pending deployments are queued in date order', function(done) {
     server.inject({
       method: 'GET',
       url: '/deployment/queue'
@@ -198,6 +198,7 @@ lab.experiment('When testing the deployment route...', function() {
           url: '/build/' + id
         }, function(response) {
           response.statusCode.should.equal(200);
+          response.result.status.should.equal('deploying');
           response.result.messages.should.contain.an.item.with.property('description', 'Deployment started');
           done();
         });

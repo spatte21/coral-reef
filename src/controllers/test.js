@@ -2,9 +2,29 @@
 
 var ReplyHelper = require('./reply-helper');
 var testDAO = require('../dao/test');
-var deploymentDAO = require('../dao/deployment');
+var buildDAO = require('../dao/build');
 var _ = require('lodash');
 var Q = require('q');
+
+function transformToTest(record) {
+  if (!!record) {
+    return {
+      _id: record.tests._id || record.tests[0]._id,
+      _parentId: record._id,
+      buildId: record.buildId,
+      branch: record.branch,
+      queued: record.tests.queued,
+      status: record.tests.status,
+      module: record.tests.module,
+      suite: record.tests.suite,
+      results: record.tests.results || null,
+      resultsText: record.tests.resultsText || null
+    };
+  }
+  else {
+    return null;
+  }
+};
 
 function TestController(){};
 TestController.prototype = (function() {
@@ -14,114 +34,240 @@ TestController.prototype = (function() {
       var helper = new ReplyHelper(request, reply);
       var params = request.plugins.createControllerParams(request);
       _.assign(params, {
-        query: { status: 'queued' },
-        sort: { queued: 1, module: 1, suite: 1 }
+        query: {'tests.status':'queued'},
+        sort: {'tests.queued':1, 'tests.module':1, 'tests.suite':1}
       });
 
-      testDAO.find(params, helper.replyQueue.bind(helper));
+      testDAO.find(params, function(err, data) {
+        helper.replyQueue(err, _.map(data, transformToTest));
+      });
     },
 
     queuePeek: function queuePeek(request, reply) {
       var helper = new ReplyHelper(request, reply);
       var params = request.plugins.createControllerParams(request);
       _.assign(params, {
-        query: { status: 'queued' },
-        sort: { queued: 1, module: 1, suite: 1 }
+        query: {'tests.status':'queued'},
+        sort: {'tests.queued':1, 'tests.module':1, 'tests.suite':1}
       });
 
-      testDAO.findFirst(params, helper.replyFindOne.bind(helper));
+      testDAO.findFirst(params, function(err, data) {
+        helper.replyQueueItem(err, transformToTest(data));
+      });
     },
 
     queuePop: function queuePop(request, reply) {
-      var helper = new ReplyHelper(request, reply);
       var params = request.plugins.createControllerParams(request);
+
+      var findFirstInQueue = Q.nfbind(testDAO.findFirst);
+      var updateTest = Q.nfbind(testDAO.update);
+
       _.assign(params, {
-        query: { status: 'queued' },
-        sort: [['queued', 1], ['module', 1], ['suite', 1]],
-        update: { status: 'testing', dequeued: new Date() }
+        query: {'tests.status':'queued'},
+        sort: {'tests.queued':1, 'tests.module':1, 'tests.suite':1}
       });
 
-      testDAO.update(params, helper.replyUpdate.bind(helper));
+      findFirstInQueue(params).then(function(data) {
+        if (data === undefined) {
+          reply(null).code(204);
+          done();
+        }
+        else if (data.exception) {
+          reply(Hapi.error.badRequest(data.exception));
+          done();
+        }
+        else
+
+        _.assign(params, {
+          testId: data.tests._id,
+          query: {tests: {$elemMatch: {_id: data.tests._id}}},
+          update: {
+            $set: {'tests.$.status': 'testing', 'tests.$.dequeued': new Date(), status: 'testing'},
+            $push: {
+              messages: {
+                type: 'info',
+                description: 'Testing started on [' + data.tests.module + '/' + data.tests.suite + ']',
+                timestamp: new Date()
+              }
+            }
+          }
+        });
+
+        return updateTest(params);
+
+      }).then(function(data) {
+        if (data.exception) {
+          reply(Hapi.error.badRequest(data.exception));
+        }
+        else {
+          reply(transformToTest(data));
+        }
+        done();
+      }).catch(function(err) {
+        reply(Hapi.error.badImplementation(err));
+      });
     },
 
     findById: function findById(request, reply) {
       var helper = new ReplyHelper(request, reply);
       var params = request.plugins.createControllerParams(request);
       _.assign(params, {
-        query: { _id: new params.ObjectID(params.id) }
+        query: { 'tests._id': new params.ObjectID(params.id) }
       });
 
-      testDAO.findById(params, helper.replyFindOne.bind(helper));
+      testDAO.findById(params, function(err, data) {
+        helper.replyFindOne(err, transformToTest(data));
+      });
     },
 
     performAction: function performAction(request, reply) {
       var params = request.plugins.createControllerParams(request);
 
-      switch (params.type) {
-        case 'complete':
-        default:
+      var updateTest = Q.nfbind(testDAO.update);
+      var findTest = Q.nfbind(testDAO.findById);
+      var findBuild = Q.nfbind(buildDAO.findById);
 
-          var updateTest = Q.nfbind(testDAO.update);
-          var find = Q.nfbind(testDAO.find);
-          var updateDeployment = Q.nfbind(deploymentDAO.update);
-          var result;
+      _.assign(params, {
+        query: { 'tests._id': new params.ObjectID(params.id) }
+      });
 
-          _.assign(params, {
-            query: {_id: new params.ObjectID(params.id)},
-            sort: [],
-            update: {
-              completed: new Date(),
-              status: 'complete',
-              results: params.results,
-              resultsText: params.resultText
-            }
+      var test;
+      var build;
+
+      findTest(params).then(function(data) {
+        test = data;
+        if (test === undefined) {
+          reply(Hapi.error.notFound('No record found'));
+          done();
+        }
+        else if (test.exception) {
+          reply(Hapi.error.badRequest(test.exception));
+          done();
+        }
+
+        _.assign(params, {
+          id: test._id
+        });
+
+        return findBuild(params);
+
+      }).then(function(data) {
+        build = data;
+        if (build === undefined || build === null) {
+          reply(Hapi.error.notFound('No record found'));
+          done();
+        }
+        else if (build.exception) {
+          reply(Hapi.error.badRequest(build.exception));
+          done();
+        }
+
+        _.assign(params, {
+          testId: test.tests._id,
+          query: {tests: {$elemMatch: {_id: test.tests._id}}}
+        });
+
+
+        switch (params.type) {
+          case 'complete':
+
+            var updateProps = {
+              'tests.$.status': 'complete',
+              'tests.$.completed': new Date(),
+              'tests.$.results': params.results,
+              'tests.$.resultsText': params.resultsText
+            };
+
+            var updateMessages = [{
+              type: 'info',
+              description: 'Testing completed on [' + test.tests.module + '/' + test.tests.suite + ']',
+              timestamp: new Date()
+            }];
+
+            break;
+
+          case 'cancelled':
+
+            var updateProps = {
+              'tests.$.status': 'cancelled',
+              'tests.$.completed': new Date(),
+              'tests.$.results': null,
+              'tests.$.resultsText': null
+            };
+
+            var updateMessages = [{
+              type: 'warning',
+              description: 'Testing cancelled on [' + test.tests.module + '/' + test.tests.suite + ']',
+              timestamp: new Date()
+            }];
+
+            break;
+        }
+
+        var outstandingTests = _.where(build.tests, function (element) {
+          if ((element.status !== 'complete' && element.status !== 'cancelled') &&
+            element._id.toString() != test.tests._id.toString())
+            return true;
+          else
+            return false;
+        });
+
+        if (outstandingTests.length === 0) {
+          updateProps['status'] = 'complete';
+          updateProps['deployment.environmentStatus'] = 'finished';
+          updateMessages.push({
+            type: 'info',
+            description: 'Testing finished, environment marked for recycling',
+            timestamp: new Date()
           });
+        }
 
-          updateTest(params).then(function(data) {
-            result = data;
-            if (result.exception) {
-              reply(Hapi.error.badRequest(result.exception));
-              done();
+        _.assign(params, {
+          update: {
+            $set: updateProps,
+            $push: {
+              messages: {$each: updateMessages}
             }
+          }
+        });
 
-            _.assign(params, {
-              query: {buildId: result.buildId, status: {$ne: 'complete'}},
-              sort: {}
-            });
-            return find(params);
+        return updateTest(params);
 
-          }).then(function(data) {
-            if (result.exception) {
-              reply(Hapi.error.badRequest(result.exception));
-              done();
-            }
+      }).then(function(data) {
+        if (data.exception) {
+          reply(Hapi.error.badRequest(data.exception));
+        }
+        else {
+          reply(transformToTest(data));
+        }
+        done();
 
-            if (!!data && data.length === 0) {
-              _.assign(params, {
-                query: {_id: new params.ObjectID(result.deploymentId)},
-                sort: [],
-                update: {environmentStatus: 'finished'}
-              });
+      }).catch(function(err) {
+        reply(Hapi.error.badImplementation(err));
+      });
+    },
 
-              return updateDeployment(params);
-            }
-            else {
-              reply(result);
-              done();
-            }
-          }).then(function(data) {
-            if (data.exception) {
-              reply(Hapi.error.badRequest(data.exception));
-            }
-            else {
-              reply(result);
-            }
-            done();
-          }).catch(function(err) {
-            reply(Hapi.error.badImplementation(err));
-          });
-          break;
+    query: function query(request, reply) {
+      var helper = new ReplyHelper(request, reply);
+      var params = request.plugins.createControllerParams(request);
+      var query = {};
+
+      if (!!params.status) {
+        query['tests.status'] = params.status;
       }
+
+      if (!!params.buildId) {
+        query['buildId'] = params.buildId;
+      }
+
+      _.assign(params, {
+        query: query,
+        sort: {'tests.queued':1, 'tests.module':1, 'tests.suite':1}
+      });
+
+      testDAO.find(params, function(err, data) {
+        helper.replyFind(err, _.map(data, transformToTest));
+      });
     }
   };
 
