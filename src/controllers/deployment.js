@@ -152,6 +152,7 @@ DeploymentController.prototype = (function() {
               tests.forEach(function (element) {
                 element.suites.forEach(function (suite) {
                   update.tests.push({
+                    _id: new params.ObjectID(),
                     module: suite.module,
                     suite: suite.suite,
                     queued: new Date(),
