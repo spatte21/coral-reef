@@ -31,26 +31,26 @@ lab.experiment('When testing the releaseEvent route...', function() {
           {
             releaseId: '5.1',
             type: 'Development',
-            starts: moment().add(-60, 'd').toISOString(),
-            ends: moment().add(-50, 'd').toISOString()
+            starts: new Date(moment().add(-60, 'd').toISOString()),
+            ends: new Date(moment().add(-50, 'd').toISOString())
           },
           {
             releaseId: '5.1',
             type: 'Testing',
-            starts: moment().add(-40, 'd').toISOString(),
-            ends: moment().add(-30, 'd').toISOString()
+            starts: new Date(moment().add(-40, 'd').toISOString()),
+            ends: new Date(moment().add(-30, 'd').toISOString())
           },
           {
             releaseId: '5.2',
             type: 'Development',
-            starts: moment().add(-20, 'd').toISOString(),
-            ends: moment().add(-10, 'd').toISOString()
+            starts: new Date(moment().add(-20, 'd').toISOString()),
+            ends: new Date(moment().add(-10, 'd').toISOString())
           },
           {
             releaseId: '5.2',
             type: 'Testing',
-            starts: moment().add(0, 'd').toISOString(),
-            ends: moment().add(10, 'd').toISOString()
+            starts: new Date(moment().add(0, 'd').toISOString()),
+            ends: new Date(moment().add(10, 'd').toISOString())
           }
         ]
       }, function(err) {

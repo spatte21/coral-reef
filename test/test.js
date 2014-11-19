@@ -45,14 +45,14 @@ lab.experiment('When testing the test route...', function() {
                 module: 'hr',
                 suite: 'screen design',
                 status: 'queued',
-                queued: moment().add(-10, 'm').toISOString()
+                queued: new Date(moment().add(-10, 'm').toISOString())
               },
               {
                 _id: id('546a30f78888d194e188bd01'),
                 module: 'hr',
                 suite: 'requests',
                 status: 'queued',
-                queued: moment().add(-11, 'm').toISOString()
+                queued: new Date(moment().add(-11, 'm').toISOString())
               }
             ],
             messages: []
@@ -74,15 +74,15 @@ lab.experiment('When testing the test route...', function() {
                 module: 'training',
                 suite: 'course booking',
                 status: 'testing',
-                queued: moment().add(-21, 'm').toISOString()
+                queued: new Date(moment().add(-21, 'm').toISOString())
               },
               {
                 _id: id('546a30f78888d194e188bd03'),
                 module: 'hr',
                 suite: 'requests',
                 status: 'complete',
-                queued: moment().add(-22, 'm').toISOString(),
-                completed: moment().add(-14, 'm').toISOString(),
+                queued: new Date(moment().add(-22, 'm').toISOString()),
+                completed: new Date(moment().add(-14, 'm').toISOString()),
                 resultsText: 'I work'
               },
               {
@@ -90,7 +90,7 @@ lab.experiment('When testing the test route...', function() {
                 module: 'surveys',
                 suite: 'running a survey',
                 status: 'queued',
-                queued: moment().add(-20, 'm').toISOString()
+                queued: new Date(moment().add(-20, 'm').toISOString())
               }
             ],
             messages: []
@@ -112,7 +112,7 @@ lab.experiment('When testing the test route...', function() {
                 suite: 'course booking',
                 status: 'complete',
                 results: { message: 'lots of passes' },
-                queued: moment().add(-43, 'm').toISOString()
+                queued: new Date(moment().add(-43, 'm').toISOString())
               }
             ],
             messages: []

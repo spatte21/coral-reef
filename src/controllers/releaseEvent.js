@@ -16,10 +16,12 @@ ReleaseEventController.prototype = (function() {
       var upcomingCutoff = moment().add(-14, 'd').toISOString();
 
       _.assign(params, {
-        query: {ends: { $gt: upcomingCutoff }}
+        query: {ends: { $gte: new Date(upcomingCutoff) }}
       });
 
-      releaseEventDAO.find(params, helper.replyFind.bind(helper));
+      releaseEventDAO.find(params, function(err, data) {
+        helper.replyFind(err, data);
+      });
     },
 
     insert: function insert(request, reply) {
