@@ -17,9 +17,9 @@ function transformToTest(record) {
       status: record.tests.status,
       module: record.tests.module,
       suite: record.tests.suite,
-      hrUrl: record.tests.hrUrl || null,
-      recruitmentUrl: record.tests.recruitmentUrl || null,
-      mobileUrl: record.tests.mobileUrl || null,
+      hrUrl: record.deployment.hrUrl || null,
+      recruitmentUrl: record.deployment.recruitmentUrl || null,
+      mobileUrl: record.deployment.mobileUrl || null,
       results: record.tests.results || null,
       resultsText: record.tests.resultsText || null
     };
