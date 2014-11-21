@@ -1,0 +1,389 @@
+{
+  "tests": [
+    {
+      "keyword": "Feature",
+      "name": "Payroll",
+      "line": 1,
+      "description": "As a website user\r\nIn order to access the website content\r\nI need to log into the website",
+      "id": "payroll",
+      "uri": "features/payroll.feature",
+      "elements": [
+        {
+          "keyword": "Scenario",
+          "name": "Domino Electric Monthly home page",
+          "line": 6,
+          "description": "",
+          "id": "payroll;domino-electric-monthly-home-page",
+          "type": "scenario",
+          "steps": [
+            {
+              "keyword": "Given ",
+              "name": "I am logged in",
+              "line": 7,
+              "output": [
+                "Going to http://casdeploy005.cloudapp.net:82/logon.asp",
+                "Found the Logon page"
+              ],
+              "match": {
+                "location": "features/step_definitions/payroll_steps.rb:10"
+              },
+              "result": {
+                "status": "failed",
+                "error_message": "timed out after 30 seconds (Watir::Wait::TimeoutError)\n./features/step_definitions/payroll_steps.rb:32:in `/^I am logged in$/'\nfeatures/payroll.feature:7:in `Given I am logged in'",
+                "duration": 43213700341
+              }
+            },
+            {
+              "keyword": "And ",
+              "name": "I am on the select payroll company page",
+              "line": 8,
+              "match": {
+                "location": "features/step_definitions/payroll_steps.rb:54"
+              },
+              "result": {
+                "status": "skipped",
+                "duration": 274270
+              }
+            },
+            {
+              "keyword": "When ",
+              "name": "I choose Domino Electric Monthly",
+              "line": 9,
+              "match": {
+                "location": "features/step_definitions/payroll_steps.rb:68"
+              },
+              "result": {
+                "status": "skipped",
+                "duration": 202917
+              }
+            },
+            {
+              "keyword": "Then ",
+              "name": "I should see the payroll home page",
+              "line": 10,
+              "match": {
+                "location": "features/step_definitions/payroll_steps.rb:75"
+              },
+              "result": {
+                "status": "skipped",
+                "duration": 208974
+              }
+            },
+            {
+              "keyword": "Then ",
+              "name": "I should log out",
+              "line": 11,
+              "match": {
+                "location": "features/step_definitions/payroll_steps.rb:42"
+              },
+              "result": {
+                "status": "skipped",
+                "duration": 200770
+              }
+            }
+          ]
+        },
+        {
+          "keyword": "Scenario",
+          "name": "Domino Electric Monthly All Employees",
+          "line": 13,
+          "description": "",
+          "id": "payroll;domino-electric-monthly-all-employees",
+          "type": "scenario",
+          "steps": [
+            {
+              "keyword": "Given ",
+              "name": "I am logged in",
+              "line": 14,
+              "output": [
+                "Going to http://casdeploy005.cloudapp.net:82/logon.asp",
+                "Found the Logon page"
+              ],
+              "match": {
+                "location": "features/step_definitions/payroll_steps.rb:10"
+              },
+              "result": {
+                "status": "failed",
+                "error_message": "timed out after 30 seconds (Watir::Wait::TimeoutError)\n./features/step_definitions/payroll_steps.rb:32:in `/^I am logged in$/'\nfeatures/payroll.feature:14:in `Given I am logged in'",
+                "duration": 41275025973
+              }
+            },
+            {
+              "keyword": "And ",
+              "name": "I have chosen Domino Electric",
+              "line": 15,
+              "match": {
+                "location": "features/step_definitions/payroll_steps.rb:87"
+              },
+              "result": {
+                "status": "skipped",
+                "duration": 274222
+              }
+            },
+            {
+              "keyword": "When ",
+              "name": "I choose All Employees",
+              "line": 16,
+              "match": {
+                "location": "features/step_definitions/payroll_steps.rb:110"
+              },
+              "result": {
+                "status": "skipped",
+                "duration": 214018
+              }
+            },
+            {
+              "keyword": "Then ",
+              "name": "I should see the All Employees page",
+              "line": 17,
+              "match": {
+                "location": "features/step_definitions/payroll_steps.rb:117"
+              },
+              "result": {
+                "status": "skipped",
+                "duration": 209462
+              }
+            },
+            {
+              "keyword": "Then ",
+              "name": "I should log out",
+              "line": 18,
+              "match": {
+                "location": "features/step_definitions/payroll_steps.rb:42"
+              },
+              "result": {
+                "status": "skipped",
+                "duration": 165985
+              }
+            }
+          ]
+        },
+        {
+          "keyword": "Scenario",
+          "name": "Domino Electric Monthly HMRC Messages",
+          "line": 20,
+          "description": "",
+          "id": "payroll;domino-electric-monthly-hmrc-messages",
+          "type": "scenario",
+          "steps": [
+            {
+              "keyword": "Given ",
+              "name": "I am logged in",
+              "line": 21,
+              "output": [
+                "Going to http://casdeploy005.cloudapp.net:82/logon.asp",
+                "Found the Logon page"
+              ],
+              "match": {
+                "location": "features/step_definitions/payroll_steps.rb:10"
+              },
+              "result": {
+                "status": "failed",
+                "error_message": "timed out after 30 seconds (Watir::Wait::TimeoutError)\n./features/step_definitions/payroll_steps.rb:32:in `/^I am logged in$/'\nfeatures/payroll.feature:21:in `Given I am logged in'",
+                "duration": 41277150207
+              }
+            },
+            {
+              "keyword": "And ",
+              "name": "I have chosen Domino Electric",
+              "line": 22,
+              "match": {
+                "location": "features/step_definitions/payroll_steps.rb:87"
+              },
+              "result": {
+                "status": "skipped",
+                "duration": 195071
+              }
+            },
+            {
+              "keyword": "When ",
+              "name": "I choose HMRC Messages",
+              "line": 23,
+              "match": {
+                "location": "features/step_definitions/payroll_steps.rb:129"
+              },
+              "result": {
+                "status": "skipped",
+                "duration": 248782
+              }
+            },
+            {
+              "keyword": "Then ",
+              "name": "I should see the HMRC Messages page",
+              "line": 24,
+              "match": {
+                "location": "features/step_definitions/payroll_steps.rb:136"
+              },
+              "result": {
+                "status": "skipped",
+                "duration": 206985
+              }
+            },
+            {
+              "keyword": "Then ",
+              "name": "I should log out",
+              "line": 25,
+              "match": {
+                "location": "features/step_definitions/payroll_steps.rb:42"
+              },
+              "result": {
+                "status": "skipped",
+                "duration": 161380
+              }
+            }
+          ]
+        },
+        {
+          "keyword": "Scenario",
+          "name": "Domino Electric Monthly Integration",
+          "line": 27,
+          "description": "",
+          "id": "payroll;domino-electric-monthly-integration",
+          "type": "scenario",
+          "steps": [
+            {
+              "keyword": "Given ",
+              "name": "I am logged in",
+              "line": 28,
+              "output": [
+                "Going to http://casdeploy005.cloudapp.net:82/logon.asp",
+                "Found the Logon page"
+              ],
+              "match": {
+                "location": "features/step_definitions/payroll_steps.rb:10"
+              },
+              "result": {
+                "status": "failed",
+                "error_message": "timed out after 30 seconds (Watir::Wait::TimeoutError)\n./features/step_definitions/payroll_steps.rb:32:in `/^I am logged in$/'\nfeatures/payroll.feature:28:in `Given I am logged in'",
+                "duration": 44489297812
+              }
+            },
+            {
+              "keyword": "And ",
+              "name": "I have chosen Domino Electric",
+              "line": 29,
+              "match": {
+                "location": "features/step_definitions/payroll_steps.rb:87"
+              },
+              "result": {
+                "status": "skipped",
+                "duration": 195850
+              }
+            },
+            {
+              "keyword": "When ",
+              "name": "I choose Integration",
+              "line": 30,
+              "match": {
+                "location": "features/step_definitions/payroll_steps.rb:148"
+              },
+              "result": {
+                "status": "skipped",
+                "duration": 245492
+              }
+            },
+            {
+              "keyword": "Then ",
+              "name": "I should see the Integration page",
+              "line": 31,
+              "match": {
+                "location": "features/step_definitions/payroll_steps.rb:155"
+              },
+              "result": {
+                "status": "skipped",
+                "duration": 214060
+              }
+            },
+            {
+              "keyword": "Then ",
+              "name": "I should log out",
+              "line": 32,
+              "match": {
+                "location": "features/step_definitions/payroll_steps.rb:42"
+              },
+              "result": {
+                "status": "skipped",
+                "duration": 158470
+              }
+            }
+          ]
+        },
+        {
+          "keyword": "Scenario",
+          "name": "Domino Electric Monthly Processing",
+          "line": 34,
+          "description": "",
+          "id": "payroll;domino-electric-monthly-processing",
+          "type": "scenario",
+          "steps": [
+            {
+              "keyword": "Given ",
+              "name": "I am logged in",
+              "line": 35,
+              "output": [
+                "Going to http://casdeploy005.cloudapp.net:82/logon.asp",
+                "Found the Logon page"
+              ],
+              "match": {
+                "location": "features/step_definitions/payroll_steps.rb:10"
+              },
+              "result": {
+                "status": "failed",
+                "error_message": "timed out after 30 seconds (Watir::Wait::TimeoutError)\n./features/step_definitions/payroll_steps.rb:32:in `/^I am logged in$/'\nfeatures/payroll.feature:35:in `Given I am logged in'",
+                "duration": 42451723711
+              }
+            },
+            {
+              "keyword": "And ",
+              "name": "I have chosen Domino Electric",
+              "line": 36,
+              "match": {
+                "location": "features/step_definitions/payroll_steps.rb:87"
+              },
+              "result": {
+                "status": "skipped",
+                "duration": 196537
+              }
+            },
+            {
+              "keyword": "When ",
+              "name": "I choose Processing",
+              "line": 37,
+              "match": {
+                "location": "features/step_definitions/payroll_steps.rb:167"
+              },
+              "result": {
+                "status": "skipped",
+                "duration": 251459
+              }
+            },
+            {
+              "keyword": "Then ",
+              "name": "I should see the Processing page",
+              "line": 38,
+              "match": {
+                "location": "features/step_definitions/payroll_steps.rb:174"
+              },
+              "result": {
+                "status": "skipped",
+                "duration": 233278
+              }
+            },
+            {
+              "keyword": "Then ",
+              "name": "I should log out",
+              "line": 39,
+              "match": {
+                "location": "features/step_definitions/payroll_steps.rb:42"
+              },
+              "result": {
+                "status": "skipped",
+                "duration": 162330
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

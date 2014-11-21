@@ -3,6 +3,7 @@
 var ReplyHelper = require('./reply-helper');
 var testDAO = require('../dao/test');
 var buildDAO = require('../dao/build');
+var testParser = require('../parser/parser');
 var _ = require('lodash');
 var Q = require('q');
 
@@ -20,8 +21,7 @@ function transformToTest(record) {
       hrUrl: record.deployment.hrUrl || null,
       recruitmentUrl: record.deployment.recruitmentUrl || null,
       mobileUrl: record.deployment.mobileUrl || null,
-      results: record.tests.results || null,
-      resultsText: record.tests.resultsText || null
+      results: record.tests.results || null
     };
   }
   else {
@@ -33,6 +33,11 @@ function TestController(){};
 TestController.prototype = (function() {
 
   return {
+    parse: function(request, reply) {
+      var parsed = testParser.parse(request.payload.results);
+      reply(parsed).code(200);
+    },
+
     queue: function queue(request, reply) {
       var helper = new ReplyHelper(request, reply);
       var params = request.plugins.createControllerParams(request);
@@ -170,18 +175,18 @@ TestController.prototype = (function() {
           query: {tests: {$elemMatch: {_id: test.tests._id}}}
         });
 
+        var updateProps, updateMessages;
 
         switch (params.type) {
           case 'complete':
 
-            var updateProps = {
+            updateProps = {
               'tests.$.status': 'complete',
               'tests.$.completed': new Date(),
-              'tests.$.results': params.results,
-              'tests.$.resultsText': params.resultsText
+              'tests.$.results': testParser.parse(params.results)
             };
 
-            var updateMessages = [{
+            updateMessages = [{
               type: 'info',
               description: 'Testing completed on [' + test.tests.module + '/' + test.tests.suite + ']',
               timestamp: new Date()
@@ -191,14 +196,13 @@ TestController.prototype = (function() {
 
           case 'cancelled':
 
-            var updateProps = {
+            updateProps = {
               'tests.$.status': 'cancelled',
               'tests.$.completed': new Date(),
-              'tests.$.results': null,
-              'tests.$.resultsText': null
+              'tests.$.results': null
             };
 
-            var updateMessages = [{
+            updateMessages = [{
               type: 'warning',
               description: 'Testing cancelled on [' + test.tests.module + '/' + test.tests.suite + ']',
               timestamp: new Date()

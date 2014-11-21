@@ -1,0 +1,32 @@
+{
+  "examples": [
+    {
+      "description": "should take me to the Attendance Categories page",
+      "full_description": "Clicking a link in the left-hand menu should take me to the Attendance Categories page",
+      "status": "passed",
+      "file_path": "./spec/administration_application-data_spec.rb",
+      "line_number": 32
+    },
+    {
+      "description": "should take me to the Bank Holidays page",
+      "full_description": "Clicking a link in the left-hand menu should take me to the Bank Holidays page",
+      "status": "passed",
+      "file_path": "./spec/administration_application-data_spec.rb",
+      "line_number": 48
+    },
+    {
+      "description": "should take me to the Entitlement Profiles page",
+      "full_description": "Clicking a link in the left-hand menu should take me to the Entitlement Profiles page",
+      "status": "passed",
+      "file_path": "./spec/administration_application-data_spec.rb",
+      "line_number": 64
+    }
+  ],
+  "summary": {
+    "duration": 24.891612297,
+    "example_count": 3,
+    "failure_count": 0,
+    "pending_count": 0
+  },
+  "summary_line": "3 examples, 0 failures"
+}

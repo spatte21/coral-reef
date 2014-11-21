@@ -212,6 +212,7 @@ lab.experiment('When testing the test route...', function() {
       response.result.should.be.a('object');
       response.result._id.toString().should.equal('546a30f78888d194e188bd04');
       response.result.status.should.equal('testing');
+      response.result.hrUrl.should.equal('http://testsite.hr');
       var buildId = response.result._parentId;
 
       server.inject({
@@ -310,21 +311,23 @@ lab.experiment('When testing the test route...', function() {
     });
   });
 
-  lab.test('tests can be updated when complete', function(done) {
+  lab.test('cucumber tests can be updated when complete', function(done) {
     server.inject({
       method: 'POST',
       url: '/test/546a30f78888d194e188bd04/actions',
       payload: {
         type: 'complete',
-        results: { message: 'json' },
-        resultsText: 'text'
+        results: require('./data/cucumber')
       }
     }, function(response) {
       response.statusCode.should.equal(200);
       response.result.should.be.a('object');
       response.result.status.should.equal('complete');
-      response.result.results.message.should.equal('json');
-      response.result.resultsText.should.equal('text');
+      response.result.results.should.be.a('object');
+      response.result.results.type.should.equal('cucumber');
+      response.result.results.stats.tests.should.equal(5);
+      response.result.results.stats.passes.should.equal(0);
+      response.result.results.stats.failures.should.equal(5);
 
       server.inject({
         method: 'GET',
@@ -336,6 +339,54 @@ lab.experiment('When testing the test route...', function() {
         response.result.deployment.environmentStatus.should.equal('in use');
         done();
       });
+    });
+  });
+
+  lab.test('mocha tests can be updated when complete', function(done) {
+    // NOTE - we can posts test results for a test that has already completed
+    // (will change but for now it allows us to test the different test result formats)
+
+    server.inject({
+      method: 'POST',
+      url: '/test/546a30f78888d194e188bd04/actions',
+      payload: {
+        type: 'complete',
+        results: require('./data/mocha')
+      }
+    }, function(response) {
+      response.statusCode.should.equal(200);
+      response.result.should.be.a('object');
+      response.result.status.should.equal('complete');
+      response.result.results.should.be.a('object');
+      response.result.results.type.should.equal('mocha');
+      response.result.results.stats.tests.should.equal(14);
+      response.result.results.stats.passes.should.equal(14);
+      response.result.results.stats.failures.should.equal(0);
+      done();
+    });
+  });
+
+  lab.test('rspec tests can be updated when complete', function(done) {
+    // NOTE - we can posts test results for a test that has already completed
+    // (will change but for now it allows us to test the different test result formats)
+
+    server.inject({
+      method: 'POST',
+      url: '/test/546a30f78888d194e188bd04/actions',
+      payload: {
+        type: 'complete',
+        results: require('./data/rspec')
+      }
+    }, function (response) {
+      response.statusCode.should.equal(200);
+      response.result.should.be.a('object');
+      response.result.status.should.equal('complete');
+      response.result.results.should.be.a('object');
+      response.result.results.type.should.equal('rspec');
+      response.result.results.stats.tests.should.equal(3);
+      response.result.results.stats.passes.should.equal(3);
+      response.result.results.stats.failures.should.equal(0);
+      done();
     });
   });
 

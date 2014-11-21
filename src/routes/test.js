@@ -6,6 +6,11 @@ var testController = require('../controllers/test');
 module.exports = function() {
   return [
     {
+      method: 'POST',
+      path: '/test/parse',
+      handler: testController.parse
+    },
+    {
       method: 'GET',
       path: '/test/queue',
       handler: testController.queue,
@@ -54,8 +59,7 @@ module.exports = function() {
           },
           payload: {
             type: Joi.string().regex(/complete|cancelled/).description('The action to perform. Supported actions: \'complete\', \'cancelled\''),
-            results: Joi.object().optional().description('The results of the test expressed as a string that will parse to a JSON object'),
-            resultsText: Joi.string().optional().description('The results of the test expressed as a string (for non-JSON results)')
+            results: Joi.object().optional().description('The results of the test expressed as a string that will parse to a JSON object')
           }
         }
       }

@@ -1,0 +1,186 @@
+{
+  "stats": {
+    "suites": 1,
+    "tests": 14,
+    "passes": 14,
+    "pending": 0,
+    "failures": 0,
+    "start": "2014-11-20T11:03:04.155Z",
+    "end": "2014-11-20T11:04:56.672Z",
+    "duration": 112517
+  },
+  "tests": [
+    {
+      "title": "Providers link works",
+      "fullTitle": "Training module - left hand menu Providers link works",
+      "duration": 19400,
+      "err": {}
+    },
+    {
+      "title": "Courses link works",
+      "fullTitle": "Training module - left hand menu Courses link works",
+      "duration": 5610,
+      "err": {}
+    },
+    {
+      "title": "Profiles link works",
+      "fullTitle": "Training module - left hand menu Profiles link works",
+      "duration": 3708,
+      "err": {}
+    },
+    {
+      "title": "Needs link works",
+      "fullTitle": "Training module - left hand menu Needs link works",
+      "duration": 3725,
+      "err": {}
+    },
+    {
+      "title": "Budgets link works",
+      "fullTitle": "Training module - left hand menu Budgets link works",
+      "duration": 3134,
+      "err": {}
+    },
+    {
+      "title": "Documents link works",
+      "fullTitle": "Training module - left hand menu Documents link works",
+      "duration": 11006,
+      "err": {}
+    },
+    {
+      "title": "Budget Periods link works",
+      "fullTitle": "Training module - left hand menu Budget Periods link works",
+      "duration": 3282,
+      "err": {}
+    },
+    {
+      "title": "External Delegates link works",
+      "fullTitle": "Training module - left hand menu External Delegates link works",
+      "duration": 3211,
+      "err": {}
+    },
+    {
+      "title": "Configuration Settings link works",
+      "fullTitle": "Training module - left hand menu Configuration Settings link works",
+      "duration": 10657,
+      "err": {}
+    },
+    {
+      "title": "Schedule link works",
+      "fullTitle": "Training module - left hand menu Schedule link works",
+      "duration": 15202,
+      "err": {}
+    },
+    {
+      "title": "Training Planning link works",
+      "fullTitle": "Training module - left hand menu Training Planning link works",
+      "duration": 3503,
+      "err": {}
+    },
+    {
+      "title": "Diary link works",
+      "fullTitle": "Training module - left hand menu Diary link works",
+      "duration": 19367,
+      "err": {}
+    },
+    {
+      "title": "Course Listings link works",
+      "fullTitle": "Training module - left hand menu Course Listings link works",
+      "duration": 3344,
+      "err": {}
+    },
+    {
+      "title": "Ad-Hoc Enquiries link works",
+      "fullTitle": "Training module - left hand menu Ad-Hoc Enquiries link works",
+      "duration": 3187,
+      "err": {}
+    }
+  ],
+  "pending": [],
+  "failures": [],
+  "passes": [
+    {
+      "title": "Providers link works",
+      "fullTitle": "Training module - left hand menu Providers link works",
+      "duration": 19400,
+      "err": {}
+    },
+    {
+      "title": "Courses link works",
+      "fullTitle": "Training module - left hand menu Courses link works",
+      "duration": 5610,
+      "err": {}
+    },
+    {
+      "title": "Profiles link works",
+      "fullTitle": "Training module - left hand menu Profiles link works",
+      "duration": 3708,
+      "err": {}
+    },
+    {
+      "title": "Needs link works",
+      "fullTitle": "Training module - left hand menu Needs link works",
+      "duration": 3725,
+      "err": {}
+    },
+    {
+      "title": "Budgets link works",
+      "fullTitle": "Training module - left hand menu Budgets link works",
+      "duration": 3134,
+      "err": {}
+    },
+    {
+      "title": "Documents link works",
+      "fullTitle": "Training module - left hand menu Documents link works",
+      "duration": 11006,
+      "err": {}
+    },
+    {
+      "title": "Budget Periods link works",
+      "fullTitle": "Training module - left hand menu Budget Periods link works",
+      "duration": 3282,
+      "err": {}
+    },
+    {
+      "title": "External Delegates link works",
+      "fullTitle": "Training module - left hand menu External Delegates link works",
+      "duration": 3211,
+      "err": {}
+    },
+    {
+      "title": "Configuration Settings link works",
+      "fullTitle": "Training module - left hand menu Configuration Settings link works",
+      "duration": 10657,
+      "err": {}
+    },
+    {
+      "title": "Schedule link works",
+      "fullTitle": "Training module - left hand menu Schedule link works",
+      "duration": 15202,
+      "err": {}
+    },
+    {
+      "title": "Training Planning link works",
+      "fullTitle": "Training module - left hand menu Training Planning link works",
+      "duration": 3503,
+      "err": {}
+    },
+    {
+      "title": "Diary link works",
+      "fullTitle": "Training module - left hand menu Diary link works",
+      "duration": 19367,
+      "err": {}
+    },
+    {
+      "title": "Course Listings link works",
+      "fullTitle": "Training module - left hand menu Course Listings link works",
+      "duration": 3344,
+      "err": {}
+    },
+    {
+      "title": "Ad-Hoc Enquiries link works",
+      "fullTitle": "Training module - left hand menu Ad-Hoc Enquiries link works",
+      "duration": 3187,
+      "err": {}
+    }
+  ]
+}

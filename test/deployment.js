@@ -303,6 +303,7 @@ lab.experiment('When testing the deployment route...', function() {
           response.result.tests.should.be.a('array');
           response.result.tests.length.should.equal(2);
           response.result.tests[0].status.should.equal('queued');
+          response.result.tests[0]._id.should.exist;
           response.result.messages.should.contain.an.item.with.property('description', 'Deployment completed');
           done();
         });
