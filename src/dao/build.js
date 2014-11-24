@@ -32,7 +32,31 @@ BuildDAO.prototype = (function() {
       db.collection('builds')
         .find(query)
         .sort({startTime: -1})
-        .toArray(callback);
+        .toArray(function(err, data) {
+
+          console.log('yo');
+          var results = _.map(data, function(build) {
+            return {
+              _id: build._id,
+              buildId: build.buildId,
+              branch: build.branch,
+              status: build.status,
+              startTime: build.startTime,
+              latestMessage: _.findLast(_.sortBy(build.messages, 'timestamp')),
+              testResults: _.reduce(build.tests, function(result, test) {
+                if (!!test.results && !!test.results.stats) {
+                  result.tests += test.results.stats.tests;
+                  result.passes += test.results.stats.passes;
+                  result.failures += test.results.stats.failures;
+                }
+                return result;
+              }, { tests: 0, passes: 0, failures: 0})
+            };
+          });
+          console.log(results);
+
+          callback(err, results);
+        });
     },
 
     insert: function insert(params, callback) {
