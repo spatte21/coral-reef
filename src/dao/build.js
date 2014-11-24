@@ -34,7 +34,6 @@ BuildDAO.prototype = (function() {
         .sort({startTime: -1})
         .toArray(function(err, data) {
 
-          console.log('yo');
           var results = _.map(data, function(build) {
             return {
               _id: build._id,
@@ -53,7 +52,6 @@ BuildDAO.prototype = (function() {
               }, { tests: 0, passes: 0, failures: 0})
             };
           });
-          console.log(results);
 
           callback(err, results);
         });
