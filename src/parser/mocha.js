@@ -24,13 +24,15 @@ MochaParser.prototype =(function() {
         var test = {
           name: element.title,
           duration: element.duration,
+          status: 'Pass',
           err: {}
         };
 
         if (!!element.err.message) {
           test.err = {
             message: element.err.message
-          }
+          };
+          test.status = 'Fail';
         }
 
         parsed.tests.push(test);
