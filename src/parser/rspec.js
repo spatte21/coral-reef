@@ -23,8 +23,15 @@ RSpecParser.prototype =(function() {
       _.forEach(data.examples, function(element) {
         var test = {
           name: element.full_description,
-          status: element.status
+          status: element.status,
+          err: {}
         };
+
+        if (!!element.exception) {
+          test.err = {
+            message: element.exception.message
+          }
+        }
 
         parsed.tests.push(test);
       });
