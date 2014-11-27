@@ -1,8 +1,9 @@
 var Hapi = require('hapi');
-var Joi = require('joi');
+var UserModel = require('./src/models/user');
+var userDAO = require('./src/dao/user');
 var constants = require('./src/config/constants');
-var moment = require('moment');
 var _ = require('lodash');
+var moment = require('moment');
 var routes = require('./src/routes');
 var server;
 
@@ -38,14 +39,52 @@ server.pack.register([
       }
     }
   },
-  {
-    plugin: require('lout')
-  }
+  { plugin: require('lout') },
+  require('hapi-auth-bearer-token')
+
 ], function(err) {
   if (err) {
     console.error(err);
     throw err;
   }
+
+  server.auth.strategy('simple', 'bearer-access-token', 'required', {
+    validateFunc: function(token, callback) {
+      var request = this;
+      var params = request.plugins.createControllerParams(request);
+      var userModel = new UserModel();
+      var decodedToken;
+
+      try {
+        decodedToken = userModel.decodeToken(token);
+      }
+      catch (exception) {
+        callback(null, false, {});
+      }
+
+      if (!!decodedToken && moment(decodedToken.expires).isAfter()) {
+        _.assign(params, { userId: new params.ObjectID(decodedToken.userId) });
+
+        userDAO.findByUserId(params, function(err, user) {
+          if (err) {
+            console.error('Data access error', err);
+            callback(err, false, {});
+          }
+
+          if (!!user && user.token === token) {
+
+            callback(null, true, {token: token});
+          }
+          else {
+            callback(null, false, {});
+          }
+        });
+      }
+      else {
+        callback(null, false, {});
+      }
+    }
+  });
 
   for (var route in routes) {
     server.route(routes[route]);
