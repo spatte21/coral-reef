@@ -1,6 +1,7 @@
 'use strict';
 
 var _ = require('lodash');
+var moment = require('moment');
 
 function BuildDAO(){};
 BuildDAO.prototype = (function() {
@@ -22,6 +23,10 @@ BuildDAO.prototype = (function() {
 
       if (!!params.buildId) {
         query.buildId = params.buildId;
+      }
+
+      if (!!params.days) {
+        query.startTime = {$gte: new Date(moment().subtract(params.days, 'days').toISOString())};
       }
 
       _.assign(params, {

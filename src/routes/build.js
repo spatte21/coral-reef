@@ -42,7 +42,8 @@ module.exports = function() {
         validate: {
           query: {
             buildId: Joi.string().optional().description('If supplied will return the build with this buildId, e.g. 5.1.4343'),
-            branch: Joi.string().optional().description('If supplied will return builds belonging to this branch, e.g. develop')
+            branch: Joi.string().optional().description('If supplied will return builds belonging to this branch, e.g. develop'),
+            days: Joi.number().optional().description('If supplied will return builds completed within that number of days')
           }
         }
       }
